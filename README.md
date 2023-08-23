@@ -24,8 +24,8 @@ https://www.microsoft.com/en-us/download/details.aspx?id=30679
 
 &nbsp;
 
-### <library name> is taking up 50% of a Step in the profiler.
-Look at the actual time taken to execute the function. If it's less than 1ms then you're getting your knickers in a twist about nothing.
+### `<insert library name here>` is taking up 50% of a Step in the profiler and I am very worried about it.
+The GameMaker profiler is deceptive and the percentage measurement is nigh useless due to the way it's calculated. The bit that's actually important is the time taken to execute the function. If the execution time is less than 1ms then you're getting your knickers in a twist about nothing.
 
 &nbsp;
 
