@@ -69,3 +69,9 @@ Often caused by a broken/missing DirectX 9c runtime. [Try installing this](https
 ### I'm using GameMaker Studio 1 and my game has performance issues I can't figure out.
 
 Try using [gmsched](https://github.com/skyfloogle/gmsched).
+
+&nbsp;
+
+### I have an active subscription and/or a permanent license. Why don't I see any export options?
+
+To see your exports, you need to be logged into your Opera account. If you're logged in, but still don't see them, simply log out and log back in. This is a bug and will hopefully be fixed soon.
