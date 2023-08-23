@@ -6,6 +6,8 @@
 
 &nbsp;
 
+### Tip for debugging HTML5
+
 1. Download open-sourced HTML5 runtime from https://github.com/YoYoGames/GameMaker-HTML5. This will make runtime code not obfuscated and give actually meaningful stacktraces in case of exceptions. You can choose exact versions of runtime if needed by cloning the repo and checking-out exact commit, they are sometimes tagged with runtime version.
 
 2. Set the open-source runtime in "Preferences > Platform Settings > HTML5". Paste the path to "scripts" subfolder to "Path to HTML5 Runner"
