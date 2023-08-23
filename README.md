@@ -78,6 +78,44 @@ Try using [gmsched](https://github.com/skyfloogle/gmsched).
 
 &nbsp;
 
+### On consoles (especially Xbox) my rectangles and other primitives are offset for some reason.
+
+Known issue, use this compatibility script (expand the `os_type` if case to other affected consoles yourself):
+
+```gml
+function draw_rectangle_color_f(x1, y1, x2, y2, col1, col2, col3, col4, outline) {
+    if (os_type == os_xboxseriesxs) {
+        // d3d12 bug
+        ++x2;
+        ++y2;
+    }
+    
+    draw_rectangle_color(x1, y1, x2, y2, col1, col2, col3, col4, outline);
+}
+
+function draw_point_color_f(x1, y1, col1) {
+    if (os_type == os_xboxseriesxs) {
+        // d3d12 bug
+        ++x1;
+        ++y1;
+    }
+    
+    draw_point_color(x1, y1, col1);
+}
+
+// implement other functions in the same fashion...
+```
+
+&nbsp;
+
+### On Nintendo Switch the color channel order looks off, shouldn't it be the same as Linux?
+
+Known issue, it should be, but it isn't. On the Switch it's the same as Windows even though the graphics backend is OpenGL.
+
+(when using Scribble you might want to edit the `__SCRIBBLE_FIX_ARGB` macro to cover `os_switch` too)
+
+&nbsp;
+
 ### My font sizes in-game are not the same as in the graphics mockup.
 
 If you've created a mockup in Photoshop, Figma, GIMP, etc. and then tried to replicate it in GameMaker, you may notice that the font in GameMaker is rendered somewhat bigger than in the mockup despite font point size being the same. This is happening because of inconsistent DPI settings: image editors often have their default DPI at 72 while GameMaker's is 96. To fix this issue you, multiply the image editor's font values by 0.75 (so 48pt in Photoshop becomes 36pt in GameMaker Font Editor) or change the DPI in the image editor to 96 pixels per inch (without resampling).
