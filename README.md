@@ -75,3 +75,9 @@ Often caused by a broken/missing DirectX 9c runtime. [Try installing this](https
 ### I'm using GameMaker Studio 1 and my game has performance issues I can't figure out.
 
 Try using [gmsched](https://github.com/skyfloogle/gmsched).
+
+&nbsp;
+
+### My font sizes in-game are not the same as in the graphics mockup.
+
+If you've created a mockup for menu/GUI/HUD in Photoshop, Figma, GIMP, etc. and then tried to replicate it with all text to be drawn in code or in Sequence you may notice that the font in GameMaker is rendered somewhat bigger than in the mockup, despite font sizes are the same in the image editor and GM's font editor. This is happening because of the inconsistent DPI: image editors often have their default DPI at 72 while GameMaker's is 96. To fix this issue you may multiply the image editor's font values by 0.75 (so 48 in Photoshop becomes 36 in GameMaker Font Editor) or change the DPI of the mockup file in the image editor to 96 pixels per inch (without resampling) so it will produce correct sizes.
