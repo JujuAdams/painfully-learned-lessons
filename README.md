@@ -74,7 +74,7 @@ Turn off Feather (at least for the duration that you're doing lots of heavy room
 ## Graphics
 
 ### I am getting a shader compilation failure in GameMaker 2023 / 2022 / GameMaker Studio 2.
-Often caused by a broken/missing/outdated Visual C++ redistributable. [Try intalling this](https://www.microsoft.com/en-us/download/details.aspx?id=30679) (Visual C++ Redistributable for Visual Studio 2012 Update 4).
+Often caused by a broken/missing/outdated Visual C++ redistributable. [Try installing this](https://www.microsoft.com/en-us/download/details.aspx?id=30679) (Visual C++ Redistributable for Visual Studio 2012 Update 4).
 
 &nbsp;
 
