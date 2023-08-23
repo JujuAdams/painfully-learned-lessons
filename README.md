@@ -29,6 +29,11 @@ Try running the game in YYC to generate a C++ project, and then run the generate
 
 &nbsp;
 
+### `<insert library name here>` is taking up 50% of a Step in the profiler and I am very worried about it.
+The GameMaker profiler is deceptive and the percentage measurement is nigh useless due to the way it's calculated. The bit that's actually important is the time taken to execute the function. If the execution time is less than 1ms then you're getting your knickers in a twist about nothing.
+
+&nbsp;
+
 ### I added an object and my `fps_real` went from 5,000 down to 4,000. Help!
 
 Don't worry about it. `fps_real` is deceptively useless and the only thing it's really good for is making people panic needlessly.
@@ -36,11 +41,6 @@ Don't worry about it. `fps_real` is deceptively useless and the only thing it's 
 Frame rate is [inversely proportional to frame time](https://www.desmos.com/calculator/d4hvus9oys), which means that (among other things) minute differences in very small frame times will have seemingly disproportionately large effects on the `fps_real`. What you really care about is the **frame time,** or the amount of time it takes to deliver a frame. This means you have a budget of about 16.6 ms to do all of your Step and Draw event processing if you want to maintain a refresh rate of 60 frames per second. An `fps_real` value of 5000 means that your entire game is finished with its update tick in **0.2 milliseconds,** and an `fps_real` value of 4000 means that your entire game is finished with its update tick in **0.25 milliseconds.** That's a difference of **0.05 milliseconds,** which profesional game developers like to call "a vanishingly tiny proportion of your frame time budget" (it's about 0.3%).
 
 Whatever you did to make your `fps_real` dip, you can do it another 300 times and still hit a 60FPS target.
-
-&nbsp;
-
-### `<insert library name here>` is taking up 50% of a Step in the profiler and I am very worried about it.
-The GameMaker profiler is deceptive and the percentage measurement is nigh useless due to the way it's calculated. The bit that's actually important is the time taken to execute the function. If the execution time is less than 1ms then you're getting your knickers in a twist about nothing.
 
 &nbsp;
 
