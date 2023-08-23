@@ -26,7 +26,7 @@ Try running the game in YYC to generate a C++ project, and then run the generate
 
 ### Man, HTML5 is cursed.
 
-Sure is. Strap on the proton pack and take a look at [some tips on busting those HTML5 ghost](https://github.com/JujuAdams/painfully-learned-lessons/blob/main/HTML5.md).
+Sure is. Strap on the proton pack and take a look at [some tips on busting HTML5 ghosts](https://github.com/JujuAdams/painfully-learned-lessons/blob/main/HTML5.md).
 
 &nbsp;
 
