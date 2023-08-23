@@ -9,12 +9,12 @@
 &nbsp;
 
 ### I am getting a shader compilation failure in GameMaker 2023 / 2022 / GameMaker Studio 2.
-https://www.microsoft.com/en-us/download/details.aspx?id=30679
+Often caused by a broken/missing/outdated Visual C++ redistributable. [Try intalling this](https://www.microsoft.com/en-us/download/details.aspx?id=30679) (Visual C++ Redistributable for Visual Studio 2012 Update 4).
 
 &nbsp;
 
 ### I am getting performance issues on Windows 11 and newer versions of Windows 10.
-https://www.microsoft.com/en-us/download/details.aspx?id=30679
+Also often caused by a broken/missing/outdated Visual C++ redistributable. [Try installing this](https://www.microsoft.com/en-us/download/details.aspx?id=30679) (Visual C++ Redistributable for Visual Studio 2012 Update 4).
 
 &nbsp;
 
@@ -44,6 +44,12 @@ Whatever you did to make your `fps_real` dip, you can do it another 300 times an
 
 &nbsp;
 
+### I have an active subscription and/or a permanent license. Why don't I see any export options?
+
+To see your exports, you need to be logged into your Opera account. If you're logged in, but still don't see them, log out and log back in via the blue account icon in the top-right of the GameMaker IDE. This is a bug and will hopefully be fixed soon (issue has been present since version 2022.2.0.71, 2023-03-03).
+
+&nbsp;
+
 ### GameMaker is lagging whenever I add instances to a room.
 
 Turn off Feather (at least for the duration that you're doing lots of heavy room editing).
@@ -62,7 +68,7 @@ Usually a result of GameMaker missing configuration data for that particular mak
 &nbsp;
 
 ### I am getting a shader compilation failure in GameMaker Studio 1.
-https://www.microsoft.com/en-gb/download/details.aspx?id=8109
+Often caused by a broken/missing DirectX 9c runtime. [Try installing this](https://www.microsoft.com/en-gb/download/details.aspx?id=8109) (DirectX 9c via DirectX End-User Runtimes (June 2010)).
 
 &nbsp;
 
@@ -107,3 +113,9 @@ function draw_point_color_f(x1, y1, col1) {
 Known issue, it should be, but it isn't. On the Switch it's the same as Windows even though the graphics backend is OpenGL.
 
 (when using Scribble you might want to edit the `__SCRIBBLE_FIX_ARGB` macro to cover `os_switch` too)
+
+&nbsp;
+
+### My font sizes in-game are not the same as in the graphics mockup.
+
+If you've created a mockup in Photoshop, Figma, GIMP, etc. and then tried to replicate it in GameMaker, you may notice that the font in GameMaker is rendered somewhat bigger than in the mockup despite font point size being the same. This is happening because of inconsistent DPI settings: image editors often have their default DPI at 72 while GameMaker's is 96. To fix this issue you, multiply the image editor's font values by 0.75 (so 48pt in Photoshop becomes 36pt in GameMaker Font Editor) or change the DPI in the image editor to 96 pixels per inch (without resampling).
