@@ -97,7 +97,7 @@ This is a known issue and maybe it'll get fixed some time. In the meanwhile, you
 
 ### On Nintendo Switch the colour channel order looks off when I'm using vertex buffer functions, shouldn't it be the same as other OpenGL platforms like Linux?
 
-It should be but it isn't. On Switch, the colour order is the same as Windows even though the graphics backend is OpenGL. (When using Scribble you might want to edit the `__SCRIBBLE_FIX_ARGB` macro to cover `os_switch` too.)
+It should be but it isn't. On Switch, the colour order is the same as Windows even though the graphics backend is OpenGL. (When using [Scribble](https://github.com/jujuadams/scribble) you might want to edit the `__SCRIBBLE_FIX_ARGB` macro to cover `os_switch` too.)
 
 &nbsp;
 
