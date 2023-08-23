@@ -24,6 +24,12 @@ Try running the game in YYC to generate a C++ project, and then run the generate
 
 &nbsp;
 
+### Man, HTML5 is cursed.
+
+Sure is. Strap on the proton pack and take a look at [some tips on busting those HTML5 ghost](https://github.com/JujuAdams/painfully-learned-lessons/blob/main/HTML5.md).
+
+&nbsp;
+
 ### My `fps_real` is high but `fps` is low and performance is bad.
 `fps_real` only measures what you're doing on the CPU. You're likely GPU-bound. Turn off graphical effects, turn off shaders/effect layers, reduce particle counts, reduce rendering resolution, draw less to the screen. Use RenderDoc to identify particular pain points.
 
