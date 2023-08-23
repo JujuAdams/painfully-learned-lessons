@@ -74,4 +74,4 @@ Try using [gmsched](https://github.com/skyfloogle/gmsched).
 
 ### I have an active subscription and/or a permanent license. Why don't I see any export options?
 
-To see your exports, you need to be logged into your Opera account. If you're logged in, but still don't see them, simply log out and log back in. This is a bug and will be fixed soon.
+To see your exports, you need to be logged into your Opera account. If you're logged in, but still don't see them, simply log out and log back in. This is a bug and will hopefully be fixed soon.
