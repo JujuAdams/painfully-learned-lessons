@@ -25,7 +25,7 @@ Try running the game in YYC to generate a C++ project, and then run the generate
 &nbsp;
 
 ### My `fps_real` is high but `fps` is low and performance is bad.
-`fps_real` only measures what you're doing on the CPU. You're likely GPU-bound. Turn off graphical effects, reduce rendering resolution, draw less to the screen. Use RenderDoc to identify particular pain points.
+`fps_real` only measures what you're doing on the CPU. You're likely GPU-bound. Turn off graphical effects, turn off shaders/effect layers, reduce particle counts, reduce rendering resolution, draw less to the screen. Use RenderDoc to identify particular pain points.
 
 &nbsp;
 
@@ -34,7 +34,7 @@ The GameMaker profiler is deceptive and the percentage measurement is nigh usele
 
 &nbsp;
 
-### I added an object and my `fps_real` went from 5,000 down to 4,000. Help!
+### I added an object and my `fps_real` went from 5000 down to 4000. Help!
 
 Don't worry about it. `fps_real` is deceptively useless and the only thing it's really good for is making people panic needlessly.
 
