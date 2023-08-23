@@ -14,7 +14,7 @@ Often caused by a broken/missing/outdated Visual C++ redistributable. [Try intal
 &nbsp;
 
 ### I am getting performance issues on Windows 11 and newer versions of Windows 10.
-Also often caused by a broken/missing/outdated Visual C++ redistributable. [Try this](https://www.microsoft.com/en-us/download/details.aspx?id=30679) (Visual C++ Redistributable for Visual Studio 2012 Update 4).
+Also often caused by a broken/missing/outdated Visual C++ redistributable. [Try installing this](https://www.microsoft.com/en-us/download/details.aspx?id=30679) (Visual C++ Redistributable for Visual Studio 2012 Update 4).
 
 &nbsp;
 
