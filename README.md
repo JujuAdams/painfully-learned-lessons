@@ -111,3 +111,6 @@ If you've created a mockup in Photoshop, Figma, GIMP, etc. and then tried to rep
 1.00 rev 17. Older versions of GameMaker have patchy support for standard derivatives, and no current (GMS2023.6 and before) versions of GameMaker natively support vertex texture fetching outside of HTML5.
 
 &nbsp;
+
+### Nothing is drawing and I see "Draw failed due to invalid input layout" in the Output log.
+This happens when something you are drawing does not provide the attribute data that your shader needs. For example, if you apply a shader that expects texture coordinates, onto a draw_rectangle, it will fail. A common workaround is to have different versions for you shaders depending on what you're drawing (e.g. shd_basic, shd_textured, shd_textured_normals, etc)
