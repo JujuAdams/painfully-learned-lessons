@@ -57,7 +57,7 @@ Turn off Feather (at least for the duration that you're doing lots of heavy room
 
 ### My gamepad doesn't work.
 
-Usually a result of GameMaker missing configuration data for that particular make and model. Might be solved by using [Input](https://github.com/jujuadams/input) or by adding an updating [`gamecontrollerdb.txt`](https://github.com/JujuAdams/Input/blob/master/datafiles/sdl2.txt) to your project's Included Files.
+Usually a result of GameMaker missing configuration data for that particular make and model. Might be solved by using [Input](https://github.com/jujuadams/input) or by adding an updated [`gamecontrollerdb.txt`](https://github.com/JujuAdams/Input/blob/master/datafiles/sdl2.txt) to your project's Included Files.
 
 &nbsp;
 
