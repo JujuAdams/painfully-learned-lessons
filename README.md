@@ -44,6 +44,12 @@ Whatever you did to make your `fps_real` dip, you can do it another 300 times an
 
 &nbsp;
 
+### I have an active subscription and/or a permanent license. Why don't I see any export options?
+
+To see your exports, you need to be logged into your Opera account. If you're logged in, but still don't see them, log out and log back in via the blue account icon in the top-right of the GameMaker IDE. This is a bug and will hopefully be fixed soon (it is currently 2023-08-23).
+
+&nbsp;
+
 ### GameMaker is lagging whenever I add instances to a room.
 
 Turn off Feather (at least for the duration that you're doing lots of heavy room editing).
@@ -69,9 +75,3 @@ Often caused by a broken/missing DirectX 9c runtime. [Try installing this](https
 ### I'm using GameMaker Studio 1 and my game has performance issues I can't figure out.
 
 Try using [gmsched](https://github.com/skyfloogle/gmsched).
-
-&nbsp;
-
-### I have an active subscription and/or a permanent license. Why don't I see any export options?
-
-To see your exports, you need to be logged into your Opera account. If you're logged in, but still don't see them, simply log out and log back in. This is a bug and will hopefully be fixed soon.
