@@ -13,11 +13,6 @@ https://www.microsoft.com/en-us/download/details.aspx?id=30679
 
 &nbsp;
 
-### I am getting a shader compilation failure in GameMaker Studio 1.
-https://www.microsoft.com/en-gb/download/details.aspx?id=8109
-
-&nbsp;
-
 ### I am getting performance issues on Windows 11 and newer versions of Windows 10.
 https://www.microsoft.com/en-us/download/details.aspx?id=30679
 
@@ -41,3 +36,20 @@ Turn off Feather (at least for the duration that you're doing lots of heavy room
 
 ### What is GameMaker's GLSL ES version?
 1.00 rev 17. Older versions of GameMaker have patchy support for standard derivatives, and no current (GMS2023.6 and before) versions of GameMaker natively support vertex texture fetching outside of HTML5.
+
+&nbsp;
+
+### My gamepad doesn't work.
+
+Might be solved by using [Input](https://github.com/jujuadams/input).
+
+&nbsp;
+
+### I am getting a shader compilation failure in GameMaker Studio 1.
+https://www.microsoft.com/en-gb/download/details.aspx?id=8109
+
+&nbsp;
+
+### I'm using GameMaker Studio 1 and my game has performance issues I can't figure out.
+
+Try using [gmsched](https://github.com/skyfloogle/gmsched).
