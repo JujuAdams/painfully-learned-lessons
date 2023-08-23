@@ -46,7 +46,7 @@ Whatever you did to make your `fps_real` dip, you can do it another 300 times an
 
 ### I have an active subscription and/or a permanent license. Why don't I see any export options?
 
-To see your exports, you need to be logged into your Opera account. If you're logged in, but still don't see them, log out and log back in via the blue account icon in the top-right of the GameMaker IDE. This is a bug and will hopefully be fixed soon (it is currently 2023-08-23).
+To see your exports, you need to be logged into your Opera account. If you're logged in, but still don't see them, log out and log back in via the blue account icon in the top-right of the GameMaker IDE. This is a bug and will hopefully be fixed soon (issue has been present since 2022.2, 2023-03-03).
 
 &nbsp;
 
