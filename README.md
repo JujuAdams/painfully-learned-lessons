@@ -80,39 +80,13 @@ Try using [gmsched](https://github.com/skyfloogle/gmsched).
 
 ### On consoles (especially Xbox) my rectangles and other primitives are offset for some reason.
 
-Known issue, use this compatibility script (expand the `os_type` if case to other affected consoles yourself):
-
-```gml
-function draw_rectangle_color_f(x1, y1, x2, y2, col1, col2, col3, col4, outline) {
-    if (os_type == os_xboxseriesxs) {
-        // d3d12 bug
-        ++x2;
-        ++y2;
-    }
-    
-    draw_rectangle_color(x1, y1, x2, y2, col1, col2, col3, col4, outline);
-}
-
-function draw_point_color_f(x1, y1, col1) {
-    if (os_type == os_xboxseriesxs) {
-        // d3d12 bug
-        ++x1;
-        ++y1;
-    }
-    
-    draw_point_color(x1, y1, col1);
-}
-
-// implement other functions in the same fashion...
-```
+This is a known issue and maybe it'll get fixed some time. In the meanwhile, you'll need to manually adjust the rendering position of primitives yourself. On Xbox, for example, the top-left corner of `draw_rectangle()` will need to be moved right 1 pixel and down 1 pixel. This impacts many primitive-drawing functions cross-platform - happy hunting!
 
 &nbsp;
 
-### On Nintendo Switch the color channel order looks off, shouldn't it be the same as Linux?
+### On Nintendo Switch the colour channel order looks off when I'm using vertex buffer functions, shouldn't it be the same as other OpenGL platforms like Linux?
 
-Known issue, it should be, but it isn't. On the Switch it's the same as Windows even though the graphics backend is OpenGL.
-
-(when using Scribble you might want to edit the `__SCRIBBLE_FIX_ARGB` macro to cover `os_switch` too)
+It should be but it isn't. On Switch, the colour order is the same as Windows even though the graphics backend is OpenGL. (When using Scribble you might want to edit the `__SCRIBBLE_FIX_ARGB` macro to cover `os_switch` too.)
 
 &nbsp;
 
