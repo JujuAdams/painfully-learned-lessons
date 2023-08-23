@@ -9,12 +9,12 @@
 &nbsp;
 
 ### I am getting a shader compilation failure in GameMaker 2023 / 2022 / GameMaker Studio 2.
-https://www.microsoft.com/en-us/download/details.aspx?id=30679
+Often caused by a broken/missing Visual C++ redistributable. [Try this](https://www.microsoft.com/en-us/download/details.aspx?id=30679).
 
 &nbsp;
 
 ### I am getting performance issues on Windows 11 and newer versions of Windows 10.
-https://www.microsoft.com/en-us/download/details.aspx?id=30679
+Also often caused by a broken/missing Visual C++ redistributable. [Try this](https://www.microsoft.com/en-us/download/details.aspx?id=30679).
 
 &nbsp;
 
@@ -62,7 +62,7 @@ Usually a result of GameMaker missing configuration data for that particular mak
 &nbsp;
 
 ### I am getting a shader compilation failure in GameMaker Studio 1.
-https://www.microsoft.com/en-gb/download/details.aspx?id=8109
+You guessed it, often caused by a broken/missing Visual C++ redistributable. [Try this](https://www.microsoft.com/en-gb/download/details.aspx?id=8109).
 
 &nbsp;
 
