@@ -18,6 +18,12 @@ https://www.microsoft.com/en-us/download/details.aspx?id=30679
 
 &nbsp;
 
+### The game is crashing to desktop without an error message.
+
+Try running the game in YYC to generate a C++ project, and then run the generated solution file through Visual Studio's debugger. This'll hopefully point you in the right direction. Even if you can't solve the problem, it'll make for a more informative bug report to YYG.
+
+&nbsp;
+
 ### My `fps_real` is high but `fps` is low (performance is bad).
 `fps_real` only measures what you're doing on the CPU. You're likely GPU-bound. Turn off graphical effects, reduce rendering resolution, draw less to the screen. Use RenderDoc to identify particular pain points.
 
