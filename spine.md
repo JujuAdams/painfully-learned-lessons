@@ -72,5 +72,12 @@ function spine_slot_reset() {
 You don't! GameMaker currently does not have this feature, and you will need to set up your rig accordingly.
 
 
-### How do I play different animations on the same skeleton at different speeds?
-You don't! Either you will need to make each animation a separate skeleton, or make different versions of the animation that go at different speeds.
+### How do I play different animations on the same skeleton at different speeds? There doesn't appear to be any functions to change the speed of different tracks individually.
+You will need to progress the frames of each animation manually. Set image_speed to 0 in the create event to disable the automatic animation, and then manually count up the frame using `skeleton_animation_set_frame`.
+```
+function spine_animate(track, animSpeed) {
+	var frame = skeleton_animation_get_frame(track);
+	frame += animSpeed;
+	skeleton_animation_set_frame(track, frame);
+}
+```
