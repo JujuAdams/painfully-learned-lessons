@@ -19,8 +19,8 @@ https://www.microsoft.com/en-us/download/details.aspx?id=30679
 
 &nbsp;
 
-### `fps_real` is high but `fps` is low (performance is bad):
-You're GPU-bound. Turn off graphical effects, reduce rendering resolution, draw less to the screen. Use RenderDoc to identify particular pain points.
+### My `fps_real` is high but `fps` is low (performance is bad).
+`fps_real` only measures what you're doing on the CPU. You're likely GPU-bound. Turn off graphical effects, reduce rendering resolution, draw less to the screen. Use RenderDoc to identify particular pain points.
 
 &nbsp;
 
