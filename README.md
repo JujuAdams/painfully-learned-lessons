@@ -1,6 +1,8 @@
 <h1 align="center">Painfully Learned Lessons</h1>
 
-<p align="center"><i>A straight-forward guide to mitigate the various harms committed upon society by YoYoGames' masterwork of digital torture, <b>GameMaker</b>. PRs welcome.</i></p>
+<p align="center"><i>A straight-forward guide to mitigate the various harms committed upon society by YoYoGames' masterwork of digital torture, <b>GameMaker</b>.</i></p>
+
+<p align="center"><i>PRs welcome. Share your pain.</i></p>
 
 &nbsp;
 
