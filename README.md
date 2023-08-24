@@ -75,6 +75,12 @@ Turn off Feather (at least for the duration that you're doing lots of heavy room
 
 &nbsp;
 
+### I'm using GameMaker Studio 1 and my game has performance issues I can't figure out.
+
+Try using [gmsched](https://github.com/skyfloogle/gmsched).
+
+&nbsp;
+
 &nbsp;
 
 ## Graphics
@@ -86,12 +92,6 @@ Often caused by a broken/missing/outdated Visual C++ redistributable. [Try insta
 
 ### I am getting a shader compilation failure in GameMaker Studio 1.
 Often caused by a broken/missing DirectX 9c runtime. [Try installing this](https://www.microsoft.com/en-gb/download/details.aspx?id=8109) (DirectX 9c via DirectX End-User Runtimes (June 2010)).
-
-&nbsp;
-
-### I'm using GameMaker Studio 1 and my game has performance issues I can't figure out.
-
-Try using [gmsched](https://github.com/skyfloogle/gmsched).
 
 &nbsp;
 
