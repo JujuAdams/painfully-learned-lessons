@@ -34,11 +34,9 @@ Usually a result of GameMaker missing configuration data for that particular mak
 
 &nbsp;
 
-### My game was running fine on YYC, but I changed one line and now GameMaker just vomits random garbage all over the console and crashes!
+### My game was running fine on YYC, but I changed one line and now my game doesn't compile.
 
-In theory the YYC module should detect changed files and only recompile those needed. This is a measure to speed up potentially long compile times. Unfortunately, in practice, it screws it up more often than not and mismatched assortments of old code and new causes the linker to flip a table and run screaming from the building.
-
-To solve this, hit the Clean Cache button to force GameMaker to recompile from scratch. (If you know your way around the generated YYC files you can go into the cache and delete the files that specifically are responsible for the issues, but this can be more trouble than it's worth.)
+The YYC module should detect changed files and only recompile those needed but it occasionally loses track, especially after adding scripts and objects. To solve this, hit the Clean Cache button (the little brush next to the debug/play/stop buttons in the IDE) to force GameMaker to recompile from scratch. You can also delete specific files from the cache to force a smaller and faster partial recompile but this is often more trouble than it's worth.
 
 &nbsp;
 
