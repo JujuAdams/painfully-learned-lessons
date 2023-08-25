@@ -30,7 +30,7 @@ To see your exports, you need to be logged into your Opera account. If you're lo
 
 ### My gamepad doesn't work.
 
-Usually a result of GameMaker missing configuration data for that particular make and model. Might be solved by using [Input](https://github.com/jujuadams/input) or by adding an updated [`gamecontrollerdb.txt`](https://github.com/JujuAdams/Input/blob/master/datafiles/sdl2.txt) to your project's Included Files.
+Usually a result of GameMaker missing configuration data for that particular make and model. Might be solved by using [Input](https://github.com/jujuadams/input) or by adding an updated [`gamecontrollerdb.txt`](https://github.com/gabomdq/SDL_GameControllerDB/blob/master/gamecontrollerdb.txt) to your project's Included Files.
 
 &nbsp;
 
