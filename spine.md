@@ -1,17 +1,10 @@
 # Various Spine runtime problems and some workarounds
 
-
-### I'm having trouble getting my exported Spine JSON file imported into GameMaker.
-At the time of writing this, GameMaker only supports Spine 4.0, not newer versions. You will need to make sure you are exporting a 4.0 JSON. You can select what version to export as in the export options in Spine, but keep in mind that exporting to 4.0 from 4.1 will cause anything that can only be done in 4.1 to be lost. To avoid unexpected data loss, you can go Spine > settings > application and change the version for Spine to launch in to the latest 4.0 version. If you already did work in 4.1 and want to revert to 4.0, you can open your project on 4.1, export JSON to 4.0, reopen Spine in 4.0, and then use import data to import a 4.0 version of your project.
-
-When exporting a JSON to import into GameMaker, you want to have your pack settings as  "Pack ``Attachments`` to ``Atlas per Skeleton``". On the GameMaker end, you import the Spine sprite by creating a new sprite asset, hitting the Import button, and then select BOTH the JSON text file and the atlas image file to import at the same time.
-
-
 ### What's up with the animation update event? It's not behaving how I would expect.
 The documentation is incorrect. This event does not run once per step right before draw, it runs every time ``draw_self()`` is called. It does NOT run if you draw the sprite using one of the draw_sprite functions. This means it can run 0 times or multiple times depending on how your drawing is handled. It also cannot be cleanly implemented with state machines since it's a separate event. Bone data will be updated between step and end step, so you can run code you would put in animation update in end step instead. I personally run my state machine in end step for every object that uses a spine sprite, and avoid using the animation update event entirely.
 
 
-### My event frame never triggers, even though I'm definitely going past that frame!
+### My event frame never triggers, even though I'm definitely going past that frame, but only for some events!
 `skeleton_animation_get_frame` gets slowly get more and more inaccurate over time. The first time you run an animation, it might give you 5.00 for your event frame, and your `skeleton_animation_get_frame(channel) == skeleton_animation_get_event_frames("My Cool Animation", "My Cool Event")[0]` check will go through. However, on the 10th time, it could be giving you 5.05 and causing equivalency checks to fail. So, you need to instead check if you're close to the event frame instead of exactly on it. You could also forcibly set the animation frame back to 0 on each loop to prevent excessive deviation, but the problem will still happen if the event frame is later in the animation and the animation is long enough. Note that the slow drift of the frame number can be positive or negative, so simply flooring the frame will not always work, depending on the animation.
 ```
 function spine_event(event_name, channel = 0, event_num = 0, deviation_range = 0.5) {
@@ -67,17 +60,5 @@ function spine_slot_reset() {
 }
 ```
 
-
-### How do I use animation track alpha in GameMaker?
-You don't! GameMaker currently does not have this feature, and you will need to set up your rig accordingly.
-
-
 ### How do I play different animations on the same skeleton at different speeds? There doesn't appear to be any functions to change the speed of different tracks individually.
 You will need to progress the frames of each animation manually. Set image_speed to 0 in the create event to disable the automatic animation, and then manually count up the frame using `skeleton_animation_set_frame`.
-```
-function spine_animate(track, animSpeed) {
-	var frame = skeleton_animation_get_frame(track);
-	frame += animSpeed;
-	skeleton_animation_set_frame(track, frame);
-}
-```
