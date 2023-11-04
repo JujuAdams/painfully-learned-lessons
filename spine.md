@@ -64,5 +64,7 @@ function spine_slot_reset() {
 }
 ```
 
+&nbsp;
+
 ### How do I play different animations on the same skeleton at different speeds? There doesn't appear to be any functions to change the speed of different tracks individually.
 You will need to progress the frames of each animation manually. Set image_speed to 0 in the create event to disable the automatic animation, and then manually count up the frame using `skeleton_animation_set_frame`.
