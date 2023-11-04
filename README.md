@@ -95,6 +95,12 @@ Often caused by a broken/missing DirectX 9c runtime. [Try installing this](https
 
 &nbsp;
 
+### What's going on with Spine?
+
+See the special [Spine](spine.md) page for some pointers.
+
+&nbsp;
+
 ### On consoles (especially Xbox) my rectangles and other primitives are offset for some reason.
 
 This is a known issue and maybe it'll get fixed some time. In the meanwhile, you'll need to manually adjust the rendering position of primitives yourself. On Xbox, for example, the top-left corner of `draw_rectangle()` will need to be moved right 1 pixel and down 1 pixel. This impacts many primitive-drawing functions cross-platform - happy hunting!
