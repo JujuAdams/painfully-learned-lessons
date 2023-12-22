@@ -73,6 +73,8 @@ Whatever you did to make your `fps_real` dip, you can do it another 300 times an
 
 Turn off Feather (at least for the duration that you're doing lots of heavy room editing).
 
+If you still want to use Feather, starting in **GMS2023.11** you can go into Feather preferences and hit the `Do not analyze project for Room Instances with auto-generated names` and/or `Do not analyze Room Instances` options to alleviate the worst offenders.
+
 &nbsp;
 
 ### I'm using GameMaker Studio 1 and my game has performance issues I can't figure out.
