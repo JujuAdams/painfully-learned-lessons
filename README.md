@@ -109,6 +109,14 @@ See the special [Spine](spine.md) page for some pointers.
 
 &nbsp;
 
+### The GPU scissors functions don't work properly.
+
+GPU scissor functions operate in "surface pixel space". This means that you need to set up the scissor coordinates by counting pixels on the **surface itself** instead of pixels in the room or on the view. When using scissoring on the backbuffer in the Draw GUI events, the surface pixels to count are the number of pixels on the window itself.
+
+*(For those into their graphics programming, the GPU scissor test happens in normalized device coordinates. GameMaker presents this to us as a familiar pixel metric instead of the actual normalized coordinates.)*
+
+&nbsp;
+
 ### On consoles (especially Xbox) my rectangles and other primitives are offset for some reason.
 
 This is a known issue and maybe it'll get fixed some time. In the meanwhile, you'll need to manually adjust the rendering position of primitives yourself. On Xbox, for example, the top-left corner of `draw_rectangle()` will need to be moved right 1 pixel and down 1 pixel. This impacts many primitive-drawing functions cross-platform - happy hunting!
