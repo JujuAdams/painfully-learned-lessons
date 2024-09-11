@@ -71,7 +71,7 @@ Whatever you did to make your `fps_real` dip, you can do it another 300 times an
 
 ### I want to hit 5,000 FPS when measuring using `fps_real` because that means my game will play better.
 
-A variant of the above. `fps_real` is a poor metric to begin with and targeting a framerate far above the update rate of every screen in existence is unnecessary.
+A variant of the above. `fps_real` is a poor metric to begin with, and targeting a framerate far above the update rate of every display in existence is unnecessary. If you *really* want to target very high framerates, shoot for 240FPS when measuring with the native `fps` variable. To be clear: this is still ridiculously high but at least it's somewhat reasonable.
 
 &nbsp;
 
