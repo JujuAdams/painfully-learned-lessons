@@ -69,6 +69,12 @@ Whatever you did to make your `fps_real` dip, you can do it another 300 times an
 
 &nbsp;
 
+### I want to hit 5,000 FPS when measuring using `fps_real` because that means my game will play better.
+
+A variant of the above. `fps_real` is a poor metric to begin with and targeting a framerate far above the update rate of every screen in existence is unnecessary.
+
+&nbsp;
+
 ### GameMaker is lagging whenever I add instances to a room.
 
 Turn off Feather (at least for the duration that you're doing lots of heavy room editing).
