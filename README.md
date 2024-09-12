@@ -109,9 +109,11 @@ See the special [Spine](spine.md) page for some pointers.
 
 &nbsp;
 
-### The GPU scissors functions don't work properly.
+### The GPU scissor functions don't work properly.
 
-GPU scissor functions operate in "surface pixel space". This means that you need to set up the scissor coordinates by counting pixels on the **surface itself** instead of pixels in the room or on the view. When using scissoring on the backbuffer in the Draw GUI events, the surface pixels to count are the number of pixels on the window itself.
+GPU scissor functions operate in "surface pixel space". This means that you need to set up the scissor coordinates by counting pixels on the **surface itself** instead of pixels in the room or on the view.
+
+When using scissoring on the backbuffer in the Draw GUI events, the surface pixels to count are the number of pixels on the window itself. The scissor functiona do not respect GUI offset or width/heighr/scale.
 
 *(For those into their graphics programming, the GPU scissor test happens in normalized device coordinates. GameMaker presents this to us as a familiar pixel metric instead of the actual normalized coordinates.)*
 
