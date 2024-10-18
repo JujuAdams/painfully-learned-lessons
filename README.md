@@ -144,3 +144,21 @@ If you've created a mockup in Photoshop, Figma, GIMP, etc. and then tried to rep
 
 ### Nothing is drawing and I see "Draw failed due to invalid input layout" in the Output log.
 This happens when something you are drawing does not provide the attribute data that your shader needs. For example, if you apply a shader that expects texture coordinates, onto a draw_rectangle, it will fail. A common workaround is to have different versions for you shaders depending on what you're drawing (e.g. shd_basic, shd_textured, shd_textured_normals, etc)
+
+&nbsp;
+
+## Where common wisdom is defeated
+
+This section is for people who thought they knew better, but didn't, such as developers who attempt to apply previous programming experience to GameMaker.
+
+&nbsp;
+
+### `self` is not a reference
+
+The `self` keyword in GML is not a reference to an instance. It is a constant which tells the runtime to evaluate to the current value of the keyword `id`. To get a lasting reference to a specific instance, you have to use `id` directly.
+
+&nbsp;
+
+### `delta_time` includes dropped frames
+
+While GameMaker's animation system does not advance when frames are dropped, (such as while dragging the game's window around) the value of `delta_time` will. While this is part of its purpose, its also a detail that is easy to miss and can break your game when late or dropped frames cause it to become very large. Often, it is better to get passed game time by evaluating `game_get_speed()` once per Step Event.
