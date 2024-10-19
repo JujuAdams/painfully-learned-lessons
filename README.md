@@ -54,6 +54,12 @@ Also often caused by a broken/missing/outdated Visual C++ redistributable. [Try 
 
 &nbsp;
 
+### `delta_time` includes dropped frames
+
+While GameMaker's animation system does not advance when frames are dropped, (such as while dragging the game's window around) the value of `delta_time` will. This means `delta_time` can get much larger than you might expect which can break timings in your game. You should cap `delta_time` to mitigate this problem.
+
+&nbsp;
+
 ### `<insert library name here>` is taking up 50% of a Step in the profiler and I am very worried about it.
 The GameMaker profiler is deceptive and the percentage measurement is nigh useless due to the way it's calculated. The bit that's actually important is the time taken to execute the function. If the execution time is less than 1ms then you're getting your knickers in a twist about nothing.
 
@@ -143,4 +149,4 @@ If you've created a mockup in Photoshop, Figma, GIMP, etc. and then tried to rep
 &nbsp;
 
 ### Nothing is drawing and I see "Draw failed due to invalid input layout" in the Output log.
-This happens when something you are drawing does not provide the attribute data that your shader needs. For example, if you apply a shader that expects texture coordinates, onto a draw_rectangle, it will fail. A common workaround is to have different versions for you shaders depending on what you're drawing (e.g. shd_basic, shd_textured, shd_textured_normals, etc)
+This happens when something you are drawing does not provide the attribute data that your shader needs. For example, if you apply a shader that expects texture coordinates, onto a draw_rectangle, it will fail. A common workaround is to have different versions for you shaders depending on what you're drawing (e.g. shd_basic, shd_textured, shd_textured_normals, etc).
