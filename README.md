@@ -54,7 +54,7 @@ Also often caused by a broken/missing/outdated Visual C++ redistributable. [Try 
 
 &nbsp;
 
-### `delta_time` includes dropped frames
+### `delta_time` shoots up really high when I drag the window. What's going on?
 
 While GameMaker's animation system does not advance when frames are dropped, (such as while dragging the game's window around) the value of `delta_time` will. This means `delta_time` can get much larger than you might expect which can break timings in your game. You should cap `delta_time` to mitigate this problem.
 
