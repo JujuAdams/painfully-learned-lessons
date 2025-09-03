@@ -150,3 +150,8 @@ If you've created a mockup in Photoshop, Figma, GIMP, etc. and then tried to rep
 
 ### Nothing is drawing and I see "Draw failed due to invalid input layout" in the Output log.
 This happens when something you are drawing does not provide the attribute data that your shader needs. For example, if you apply a shader that expects texture coordinates, onto a draw_rectangle, it will fail. A common workaround is to have different versions for you shaders depending on what you're drawing (e.g. shd_basic, shd_textured, shd_textured_normals, etc).
+
+&nbsp;
+
+### I used a vertex shader on my sprite to move it but the sprite vanished!?
+This is usually caused by the runner's own, [frustum-based sprite culling](https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Drawing/GPU_Control/gpu_set_sprite_cull.htm). If a sprite is outside the frustum the runner won't put its vertices in the batch to begin with; your sprite is never sent off for rasterization and the shader never even touches the thing. If that fancy vertex shader is trying to move a sprite from out-of-the-view to in-the-view then the likely culprit is this sprite culling. GameMaker introduced a function to disable sprite culling in version **2024.6**. Don't confuse `gpu_set_sprite_cull()` with `gpu_set_cullmode()` though; these are two different guys.
