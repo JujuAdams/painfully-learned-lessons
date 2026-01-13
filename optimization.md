@@ -144,7 +144,7 @@ Is the aesthetic appeal of OOP abstraction worth making your code eleven times s
 
 ### Verdict
 
-Abstraction is good in a lot of cases, and from a code maintenance standpoint using too few abstractions is much worse than using too many. However, like many things in life, a responsible software developer still needs to think about the abstraction they've written and decide if it actually contributes to their code in a meaningful way.
+Abstraction is good in a lot of cases, and from a code maintenance standpoint using too few abstractions is [much worse](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) than using too many. However, like many things in life, a responsible software developer still needs to think about the abstraction they've written and decide if it actually contributes to their code in a meaningful way.
 
 &nbsp;
 
@@ -152,11 +152,7 @@ Abstraction is good in a lot of cases, and from a code maintenance standpoint us
 
 Moving on from arrays, let's talk about arrays. In a lot of ways arrays are the most fundamental data structure that exists, and they're useful for a lot of things. As with most other things on this list, the cost of allocating a single array of elements isn't too bad, but if you do it excessively - such as in the Step event of every active instance in the game - it can start to become a lot. It's also an easy thing to not think about, since usually when people experience performance issues they look at other things first (probably because they're not using the profiler).
 
-This is almost entirely irrelevant to GameMaker because you can't create data structures on the stack and the whole runtime is so slow it doesn't really matter anyway, but if you want to impress your friends, there's a whole rabbit hole on stack memory vs heap memory and why one is slower than the other.
-
-There are also a few functions which return structs or arrays that you want to be careful of. Matrix functions are especially guilty of this, although matrix_multiply and other matrix functions recently gained the ability to output the results into an existing array instead of returning a new one, which is usually the way to go.
-
-Arrays are the most common structures that run afoul of this, but it also goes for other things, like buffers, ds_whatever, and surfaces. Surfaces can be especially bad because it's easy to create large ones without thinking about it.
+This is almost entirely irrelevant to GameMaker because you can't create data structures on the stack and the whole runtime is so slow it doesn't really matter anyway, but if you want to impress your friends, there's a whole rabbit hole on [stack memory vs heap memory](https://stackoverflow.com/questions/79923/what-and-where-are-the-stack-and-heap) and why one is slower than the other.
 
 <details>
 
@@ -183,6 +179,10 @@ Is the aesthetic appeal of OOP abstraction worth making your code eleven times s
 
 </details>
 
+There are also a few functions which return structs or arrays that you want to be careful of. Matrix functions are especially guilty of this, although [matrix_multiply](https://youtube.com/shorts/_r7Z-mIm4x4?feature=share) and other matrix functions recently gained the ability to output the results into an existing array instead of returning a new one, which is usually the way to go.
+
+Arrays are the most common structures that run afoul of this, but it also goes for other things, like buffers, ds_whatever, and surfaces. Surfaces can be especially bad because it's easy to create large ones without thinking about it.
+
 ### Verdict
 
 If your code does depend on a lot of array allocations, it can be difficult to get rid of them without changing functionality or introducing bugs. In some circumstances, you can ease the burden by declaring an array as a static variable so that it's only allocated once and the same array persists every time you call a function - but this can be dangerous if you're not careful, as it means you can accidentally carry over data from one call of the function to another, which can create errors that are very hard to debug.
@@ -193,9 +193,9 @@ If your code does depend on a lot of array allocations, it can be difficult to g
 
 Be careful with Blur, Bloom, and other full-screen smear-y filters/effects
 
-This is one of the rare times I'm going to talk about GPU stuff in this thread, and the reason for it is because it's probably the only GPU mess that it's really easy to create without doing anything weird on purpose. Bloom, glow, blur, and other post-processing effects that smear out pixels are an inherently costly operation. Since these effects are computed on every pixel, they scale especially poorly at high resolutions. Remember our discussion of time complexity? The cost of post-processing effects scales with the number of pixels in the output image, and when your resolution grows on both the horizontal and vertical axis - and I assume yours does, because a 1D game would be weird - this means the time complexity is n²-ish.
+This is one of the rare times I'm going to talk about GPU stuff in this thread, and the reason for it is because it's probably the only GPU mess that it's [really easy to create](https://www.reddit.com/r/gamemaker/comments/1kz5s42/be_careful_when_using_glow_effect_both_for_effect/) without doing anything weird on purpose. Bloom, glow, blur, and other post-processing effects that smear out pixels are an inherently costly operation. Since these effects are computed on every pixel, they scale especially poorly at high resolutions. Remember our discussion of time complexity? The cost of post-processing effects scales with the number of pixels in the output image, and when your resolution grows on both the horizontal and vertical axis - and I assume yours does, because a [1D game would be weird](https://www.wobblylabs.com/line-wobbler) - this means the time complexity is n²-ish.
 
-GameMaker's effect layers have "quality" settings, but most of them noticeably change how the result looks in a way that people usually don't like. If you're writing a shader to do this yourself, you actually can compute the effect at a lower-than-native resolution for pretty noticeable performance improvement and a minimal hit to image quality. I put in a feature request for an option like this in the preset effect layers, but they haven't done it yet (view that thread for performance stats and visual comparisons), and it unfortunately looks like they probably won't before GMRT. Maybe if enough of you people ask nicely...
+GameMaker's effect layers have "quality" settings, but most of them noticeably change how the result looks in a way that people usually don't like. If you're writing a shader to do this yourself, you actually can compute the effect at a [lower-than-native resolution](https://youtu.be/xH-KAZqwGUA) for pretty noticeable performance improvement and a minimal hit to image quality. I put in a [feature request](https://github.com/YoYoGames/GameMaker-Bugs/issues/11399) for an option like this in the preset effect layers, but they haven't done it yet (view that thread for performance stats and visual comparisons), and it unfortunately looks like they probably won't before GMRT. Maybe if enough of you people ask nicely...
 
 ### Verdict
 
@@ -211,7 +211,7 @@ These are all good optimizations, but they won't be applicable to all types of g
 
 ## Deactivating instances
 
-We've all read the Forager article by now. If you haven't, this is the Forager article. Also, how did you make it this long without running into the Forager article? That’s honestly kind of impressive, it’s like living in the United States without knowing what the Superbowl is. Anyway, there are a few things in the Forager article, and it's generally good advice. We'll get to some of the other things in it later, but for now the part that we (and most people in general) are interested in is most of the second half, where lazyeye talks about deactivating instances.
+We've all read the Forager article by now. If you haven't, this is [the Forager article](https://web.archive.org/web/20220530222246/https://gamemaker.io/en/blog/forager-optimization-in-gamemaker). Also, how did you make it this long without running into the Forager article? That’s honestly kind of impressive, it’s like living in the United States without knowing what the Superbowl is. Anyway, there are a few things in the Forager article, and it's generally good advice. We'll get to some of the other things in it later, but for now the part that we (and most people in general) are interested in is most of the second half, where lazyeye talks about deactivating instances.
 
 GameMaker instances are pretty fast, but if you have a lot of them their frame-time cost can add up over time. This includes not only the actual code you've written in the step and draw events, but also things like updating their built-in variables like x, y, speed, direction, friction, and gravity. Over the years, a lot of energy has been spent by a lot of people trying to mitigate this problem. Remember this - this is going to be a recurring theme in this list.
 
@@ -230,7 +230,52 @@ instance_activate_object(obj_grass);
 instance_deactivate_region(left, top, width, height, false, true);
 ```
 
-On the face of it, it works fairly well. Here's an example I made using this grass that sways when the player runs past it project.
+On the face of it, it works fairly well. Here's an example I made using this [grass that sways when the player runs past it](https://www.youtube.com/watch?v=FOSnWHzbPzI) project.
+
+<details>
+
+<summary>how much of a difference does it make?</summary>
+
+The individual grass objects aren't too heavy, but when there's this many of them it starts to be a problem.
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/deactivation/20000_grass.png)
+
+If we do the instance deactivation trick above, we get a nice speed boost. In this scene we have 20,000 grass objects in the game but only about 250 of them are on screen at once.
+
+However, see that extra time that was added to the Player step event where the deactivation/reactivation is taking place? In particular, the re-activation time is rather high. When you do this, it's critical that the deactivation/reactivation time doesn't end up taking longer than the time it takes to process all of the instances themselves.
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/deactivation/less_grass.png)
+
+If you're just doing this, you probably won't actually hit that point unless you're deactivating and reactivating every instance in the room every step. However, the Forager article also does something else: it manually tracks deactivated instances so that it can reference them elsewhere using some of GameMaker's other instance functions. I'm not going to re-implement the whole thing here, but I will write a simplified version that looks like this.
+
+```gml
+global.deactivated = ds_list_create();
+
+function instance_deactiavte_region_manual(object, x, y, w, h) {
+    with (object) {
+        if (bbox_right < x || bbox_left > x + w || bbox_bottom < y || bbox_top > y + h) {
+            instance_deactivate_object(self);
+            ds_list_add(global.deactivated, self);
+        }
+    }
+}
+
+function instance_activate_region_manual(x, y, w, h) {
+    for (var i = ds_list_size(global.deactivated) - 1; i >= 0; i--) {
+        var inst = global.deactivated[| i];
+        if (inst.bbox_right >= x && inst.bbox_left <= x + w && inst.bbox_bottom >= y && inst.bbox_top <= y + h) {
+            instance_activate_object(inst);
+            ds_list_delete(global.deactivated, i);
+        }
+    }
+}
+```
+
+![](https://github.com/DragoniteSpam/GameMakerOptimizationTierList/blob/master/images/deactivation/the_forager_way.png?raw=true)
+
+If we use those functions instead, our deactivation/reactivation time goes up by a lot. It's still going to be faster than leaving everything alone - probably - but if you don't need the special instance tracking feature, don't use it.
+
+</details>
 
 The cost of deactivating/reactivating instances is more or less fixed (given a constant number of instances), while the cost of an instance's step or draw event can vary greatly. If most of the instances you're dealing with are simplistic things like these grass objects - here each individual grass object takes about 800 nanoseconds of frame time, and managing the deactivation system takes about 50 nanoseconds for each - the benefit of deactivating them won't be as interesting. If the objects you're dealing with are much more complicated, perhaps running some kind of pathfinding AI or a more involved Draw event, the deactivation system will still take about 50 nanoseconds for each but the cost of having them active will be much higher.
 
@@ -250,7 +295,7 @@ Your GPU is happiest when you give it a lot of work to do and don't interrupt it
 
 Most of the time, the cost is pretty small. Here's the difference between drawing 20,000 sprites in one batch vs drawing 20,000 sprites in 20,000 batches.
 
-Most of the time the cost of a batch break is pretty small and different sources have a more or less equivalent cost, but there are a few exceptions. Setting any of the rendering matrices (world, view, or projection) requires a little more math behind the scenes, and matrix_sets usually add up a little more quickly. Setting or resetting the surface target is a little more expensive. Your GML code and rendering on the GPU happen asynchronously, which means GameMaker dumps a pile of work on the GPU's desk and the GPU will get to it when it gets to it. When you change the surface target, GameMaker has to actually stop what it's doing and wait for the GPU to finish. This still doesn't take a ton of time in the grand scheme of things - it's not uncommon for GameMaker games to go through a stack of three or four different surfaces in postprocessing effects - but you should avoid using them for small, repeated tasks. If you need to clip graphics to a region on screen, for example, you can use the scissor region or stencil testing instead.
+Most of the time the cost of a batch break is pretty small and different sources have a more or less equivalent cost, but there are a few exceptions. Setting any of the rendering matrices (world, view, or projection) requires a little more math behind the scenes, and matrix_sets usually add up a little more quickly. Setting or resetting the surface target is a little more expensive. Your GML code and rendering on the GPU happen asynchronously, which means GameMaker dumps a pile of work on the GPU's desk and the GPU will get to it when it gets to it. When you change the surface target, GameMaker has to actually stop what it's doing and wait for the GPU to finish. This still doesn't take a ton of time in the grand scheme of things - it's not uncommon for GameMaker games to go through a stack of three or four different surfaces in postprocessing effects - but you should avoid using them for small, repeated tasks. If you need to clip graphics to a region on screen, for example, you can use the [scissor region](https://www.youtube.com/watch?v=vwW7KOX7_tw) or [stencil testing](https://www.youtube.com/watch?v=Bd878s1PaLc) instead.
 
 Texture swaps are a little more interesting. GameMaker puts all of your graphics on composite texture atlases, and for ideal results you would draw objects in your game grouped together based on what texture atlas they belong to instead of jumping between texture atlases frequently. Since referencing a new texture page implicitly interrupts the GPU state, all texture swaps are also batch breaks.
 
@@ -262,7 +307,7 @@ We'll talk a little more about GPU memory in the next two items.
 
 It's important to not let this get out of hand, but as long as things don't get out of hand it's far from the most important thing. It's slightly more important on low-powered devices like laptops, and it's more important still or mobile phones. Be a little more judicious with surfaces. Don't run out of VRAM or bad things happen.
 
-Here's a more detailed video I made on it a while ago.
+[Here's a more detailed video I made on it a while ago.](https://youtu.be/VnuWurbOrBo)
 
 &nbsp;
 
