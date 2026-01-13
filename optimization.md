@@ -189,7 +189,7 @@ If you use the additional instance-tracking enhancements mentioned in the Forage
 
 &nbsp;
 
-# Avoid large numbers of batch breaks and texture swaps
+## Avoid large numbers of batch breaks and texture swaps
 
 Your GPU is happiest when you give it a lot of work to do and don't interrupt it. Anything that changes the GPU state will do this: setting a shader or uniform, most functions that start with gpu_set_ except for gpu_set_depth, setting any kind of matrix, changing surface targets, and some other things will all do this.
 
@@ -246,6 +246,8 @@ This speeds up your game in two point five ways.
 Texture compression isn't a built-in feature of GameMaker itself, but it's available as an official extension maintained by Yoyo Games which you can use if you need it.
 
 See the video for the kind of performance benefits and rendering artefacts you can expect from texture compression.
+
+[![GPU Texture Compression in GameMaker](https://img.youtube.com/vi/895A6dFBS6M/0.jpg)](https://www.youtube.com/watch?v=895A6dFBS6M)
 
 ### Verdict
 
