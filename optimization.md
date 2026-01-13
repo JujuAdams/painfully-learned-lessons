@@ -295,11 +295,41 @@ Your GPU is happiest when you give it a lot of work to do and don't interrupt it
 
 Most of the time, the cost is pretty small. Here's the difference between drawing 20,000 sprites in one batch vs drawing 20,000 sprites in 20,000 batches.
 
+<details>
+
+<summary>forum mods please don't kill me</summary>
+
+All flowers batched together.
+
+![](https://github.com/DragoniteSpam/GameMakerOptimizationTierList/blob/master/images/batches_and_swaps/all_together.png?raw=true)
+
+Here's the same scene, but each individual flower is its own batch. It runs about half as fast. That's a noticeable penalty, but it's also not crippling. We're still drawing 20,000 flowers.
+
+![](https://github.com/DragoniteSpam/GameMakerOptimizationTierList/blob/master/images/batches_and_swaps/new_batch.png?raw=true)
+
+</details>
+
 Most of the time the cost of a batch break is pretty small and different sources have a more or less equivalent cost, but there are a few exceptions. Setting any of the rendering matrices (world, view, or projection) requires a little more math behind the scenes, and matrix_sets usually add up a little more quickly. Setting or resetting the surface target is a little more expensive. Your GML code and rendering on the GPU happen asynchronously, which means GameMaker dumps a pile of work on the GPU's desk and the GPU will get to it when it gets to it. When you change the surface target, GameMaker has to actually stop what it's doing and wait for the GPU to finish. This still doesn't take a ton of time in the grand scheme of things - it's not uncommon for GameMaker games to go through a stack of three or four different surfaces in postprocessing effects - but you should avoid using them for small, repeated tasks. If you need to clip graphics to a region on screen, for example, you can use the [scissor region](https://www.youtube.com/watch?v=vwW7KOX7_tw) or [stencil testing](https://www.youtube.com/watch?v=Bd878s1PaLc) instead.
 
 Texture swaps are a little more interesting. GameMaker puts all of your graphics on composite texture atlases, and for ideal results you would draw objects in your game grouped together based on what texture atlas they belong to instead of jumping between texture atlases frequently. Since referencing a new texture page implicitly interrupts the GPU state, all texture swaps are also batch breaks.
 
 In theory, a texture swap is heavier than a batch break, because it could require data to be loaded and unloaded, which is much more expensive than simply stopping one batch and starting a new one. In practice, however, the graphics driver won't actually unload anything from VRAM unless it needs the space for something else, and if your game runs out of VRAM and has to resort to the shared GPU pool in main memory you have much bigger problems to worry about.
+
+<details>
+
+<summary>forum mods please don't kill me</summary>
+
+All flowers batched together.
+
+![](https://github.com/DragoniteSpam/GameMakerOptimizationTierList/blob/master/images/batches_and_swaps/new_batch_new_swap.png?raw=true)
+
+This is the same scene as the last one, except I checked the "separate texture page" button for the flower sprites so that each time a different one is drawn it incurs a texture swap, which as we can see has about the same cost as a regular batch break. These pixel art sprites are so small that nothing has to be moved around in memory.
+
+Messing this up badly enough that you have to actually swap data out of vram [gets complicated](https://www.google.com/search?q=is+8+gb+of+vram+enough+for+AAA+games). Here I resized every flower sprite to be about 6K or so.
+
+![](https://github.com/DragoniteSpam/GameMakerOptimizationTierList/blob/master/images/batches_and_swaps/outta_vram.png?raw=true)
+
+</details>
 
 We'll talk a little more about GPU memory in the next two items.
 
@@ -315,7 +345,7 @@ It's important to not let this get out of hand, but as long as things don't get 
 
 By default, all GameMaker surfaces come with a depth and stencil buffer, which you may or may not actually need. It won't automatically make a difference in performance unless you start running out of VRAM, and while AAA games may occasionally run into problems with this [citation needed] if we're being real with ourselves, your GameMaker game probably won't.
 
-By default, surfaces come with a 32-bit depth and stencil buffer. This amounts to an extra (width * height * 4) bytes allocated per surface. If you never use depth testing anywhere (the gpu_set_ztestenable and gpu_set_zwriteenable functions) or make use of stencil shenanigans, this is pretty much useless to you and you can turn it off with surface_depth_disable.
+By default, surfaces come with a 32-bit depth and stencil buffer. This amounts to an extra (width * height * 4) bytes allocated per surface. If you never use depth testing anywhere (the [gpu_set_ztestenable](https://manual.gamemaker.io/lts/en/GameMaker_Language/GML_Reference/Drawing/GPU_Control/gpu_set_ztestenable.htm) and [gpu_set_zwriteenable](https://manual.gamemaker.io/lts/en/GameMaker_Language/GML_Reference/Drawing/GPU_Control/gpu_set_zwriteenable.htm) functions) or make use of stencil shenanigans, this is pretty much useless to you and you can turn it off with [surface_depth_disable](https://manual.gamemaker.io/lts/en/GameMaker_Language/GML_Reference/Drawing/Surfaces/surface_depth_disable.htm).
 
 A 1280 x 720 surface will reserve about 3.5 mb of VRAM for depth and stencil, while a 1920 x 1080 surface will use about 8 mb. It's not a life changing amount of VRAM - the sprites and other textures in your game almost certainly already use more - but if you don't need it, turning it off is really easy and basically free.
 
@@ -325,7 +355,7 @@ If you do need depth or stencil, you can also enable/disable surface depth on de
 
 ### Verdict
 
-Feel free to turn off depth if you're not using it. If you use it in some places, make sure to turn it on when creating or resizing the surfaces that do need it, otherwise you can get weird depth sorting errors. Don't try to circumvent needing the depth buffer if you do need it.
+Feel free to turn off depth if you're not using it. If you use it in some places, make sure to turn it on when creating or resizing the surfaces that do need it, otherwise you can get [weird depth sorting errors](https://youtu.be/qA2mFvuaJjk). Don't try to circumvent needing the depth buffer if you do need it.
 
 &nbsp;
 
@@ -335,7 +365,7 @@ Another VRAM one.
 
 On disk, all of your sprites and everything are usually stored in PNG format or something similar. Image files stored like this are compressed so that they take up less space on the disk, but when your game is actually running they need to be decompressed into what amounts to a large 2D array of pixel data, and will take up exactly width * height * 4 bytes of memory. Among other reasons, this means you can access any pixel in an image in constant time.
 
-Texture compression on the GPU has now become widespread in games. This differs from the kind of image compression you're used to because of the requirement that any pixel should be able to be accessed in constant time, which isn't possible using algorithms like PNG or JPEG. Instead we have things like ASTC and S3TC. These compress all images by a constant factor, preserving the constant-time access property. However, unlike lossless algorithms like PNG, GPU texture compression achieves this by discarding certain information about blocks of pixels. This has the effect of producing artefacts similar to (but technically distinct from) JPEG artefacts, which are usually minimal in high-definition artwork, but can mess up pixel art pretty badly.
+Texture compression on the GPU has now become widespread in games. This differs from the kind of image compression you're used to because of the requirement that any pixel should be able to be accessed in constant time, which isn't possible using algorithms like [PNG](https://www.youtube.com/watch?v=EFUYNoFRHQI) or [JPEG](https://www.youtube.com/watch?v=0me3guauqOU). Instead we have things like [ASTC](https://en.wikipedia.org/wiki/Adaptive_scalable_texture_compression) and [S3TC](https://en.wikipedia.org/wiki/S3_Texture_Compression). These compress all images by a constant factor, preserving the constant-time access property. However, unlike lossless algorithms like PNG, GPU texture compression achieves this by discarding certain information about blocks of pixels. This has the effect of producing artefacts similar to (but technically distinct from) JPEG artefacts, which are usually minimal in high-definition artwork, but can mess up pixel art pretty badly.
 
 This speeds up your game in two point five ways.
 
@@ -343,7 +373,7 @@ This speeds up your game in two point five ways.
 2. Textures take up less space in VRAM, which means they're faster to access. Like CPUs, GPUs have on-die memory caches. When you draw an image, texture data is streamed through the cache so that it can be accessed faster because it takes less time to access data that's physically on the processor die than it is to access data in a VRAM module some distance away on the PCB. If an image of the same size takes up less data in VRAM, more of it can fit into the texture cache at any given time, meaning that sampling from it is overall faster even if the GPU has to perform some extra logic to decompress it. This is the main reason compressed textures speed up your game.
 2.5. When your game loads, textures are loaded from the disk into main memory and then transferred from main memory to VRAM. Loading and decompressing less data from the disk means your game may boot up or complete loading screens slightly faster.
 
-Texture compression isn't a built-in feature of GameMaker itself, but it's available as an official extension maintained by Yoyo Games which you can use if you need it.
+Texture compression isn't a built-in feature of GameMaker itself, but it's available as an [official extension](https://github.com/YoYoGames/GM-GPUTextureCompression) maintained by Yoyo Games which you can use if you need it.
 
 See the video for the kind of performance benefits and rendering artefacts you can expect from texture compression.
 
@@ -359,11 +389,38 @@ Visual novels would be an especially good example for when to use this, since th
 
 ## Be mindful how often you query the collision system
 
-This was more relevant pre-GMS1 before the collision system was as robust as it is now, but it still makes a small difference. Imagine you have a player who takes damage when they collide with enemies. Logically, it doesn't matter if the collision-checking code for this belongs to the player and checks for enemies or if the code belongs to the enemies and checks for the player. However, if the code belongs to the enemy and there are a large number of enemies on screen, the collision check will run once for every enemy active in the game. If the code belongs to the player, assuming there's only one instance of the player object in the game, the collision check will run once. (Most of the important collision-checking functions have a \_list version which can be used to handle multiple hit results, rather than having to deal with them one at a time.)
+This was more relevant pre-GMS1 [before the collision system was as robust as it is now](https://en.wikipedia.org/wiki/R-tree), but it still makes a small difference. Imagine you have a player who takes damage when they collide with enemies. Logically, it doesn't matter if the collision-checking code for this belongs to the player and checks for enemies or if the code belongs to the enemies and checks for the player. However, if the code belongs to the enemy and there are a large number of enemies on screen, the collision check will run once for every enemy active in the game. If the code belongs to the player, assuming there's only one instance of the player object in the game, the collision check will run once. (Most of the important collision-checking functions have a \_list version which can be used to handle multiple hit results, rather than having to deal with them one at a time.)
 
 The difference isn't huge, and honestly I don't expect most people will notice unless they're making a Vampire Survivors-like game with hundreds of enemies coming at you at once, or perhaps a bullet hell with hundreds or thousands of bullets that can all damage you. I thought about putting this in the B tier instead, but a lot of people would probably say it's good organizational practice to do this because it reduces the need for code duplication, so I'm giving it extra credit.
 
 This also goes for the Collision events, but I don't think many people use those.
+
+<details>
+
+<summary>i actually had to try pretty hard to create a situation where this made a measurable difference</summary>
+
+Here's a sample bullet hell game. We have about 6,000 bullets on screen at once (which is far more than I can fathom having in a game where you actually expect the player to win). Here the collision checking logic happens in the bullet objects. It's pretty straightforward.
+
+```gml
+if (instance_place(x, y, obj_player)) {
+    with (obj_player) hp--;
+    instance_destroy();
+}
+```
+
+The collision logic is the most heavy thing in this sample project, which sounds like a lot, but we should also remember that it's basically the ONLY thing happening in this sample project. If the bullets follow a curve instead of moving in a straight line, or do any other complicated logic, that would likely be more expensive than checking for collisions.
+
+Both the bullets and player sprites are using imprecise bounding box collision shapes, although that doesn't actually matter much because the GameMaker collision engine only checks for collisions against objects that are in the immediate vicinity anyway.
+
+![](https://github.com/DragoniteSpam/GameMakerOptimizationTierList/blob/master/images/collisions/all_instances_checking_collision.png?raw=true)
+
+We can instead move the collision logic to the player object, of which there is only one of. Maybe two or three if you're doing multiplayer. Anyway, it now looks like this.
+
+![](https://github.com/DragoniteSpam/GameMakerOptimizationTierList/blob/master/images/collisions/only_player_checking_collision.png?raw=true)
+
+Instead of doing 6,000ish miniscule collision checks we're doing one big-ish one, which cuts some amount of time out of our step event.
+
+</details>
 
 ### Verdict
 
@@ -454,6 +511,16 @@ repeat (array_length(array)) {
 
 It's a little weird-looking, but it'll get the job done. Let's have a look at how that performs.
 
+<details>
+
+<summary>here, have a chat</summary>
+
+![](https://github.com/DragoniteSpam/GameMakerOptimizationTierList/blob/master/images/loops/loop_types.png?raw=true)
+
+There are also a few middle grounds you can take, such as simplifying the update condition. Going back to the example loop above, the for loop update condition will evaluate the length of the array every time it comes around. Getting the length of an array is pretty fast, but if the size of the array doesn't change (and you aren't modifying the array you're iterating over, right?) you can cache the length of the array and reference it later by doing something like for (var i = 0, len = array_length(array); i < len; i++). This shaves off about 10% in YYC and somewhat more in VM.
+
+</details>
+
 The repeat loop is about 40% faster than the ol' reliable. So if you use a repeat loop instead of a for loop, your loops will be 40% faster, right? Sounds great, right?
 
 Wait, why did I put this in the B tier again?
@@ -470,7 +537,7 @@ Feel free to write your loops like this going forward, but I would recommend not
 
 ## Using array functions instead of loops
 
-This is an extension of the last one. GameMaker has a few functional programming-related functions, most notably array reduce, filter, map, and foreach. (There are like a dozen others but they're less common.) If you know what those are, I don't have to explain them. If you don't know what those are, skip this section. Anyway, the draw here is that in addition to getting rid of the update condition, when used appropriately the array functions let you skip updating the loop counter in addition to the update condition, which is theoretically faster.
+This is an extension of the last one. GameMaker has a few [functional programming](https://manual.gamemaker.io/beta/en/GameMaker_Language/GML_Reference/Variable_Functions/Array_Functions.htm)-related functions, most notably array reduce, filter, map, and foreach. (There are like a dozen others but they're less common.) If you know what those are, I don't have to explain them. If you don't know what those are, skip this section. Anyway, the draw here is that in addition to getting rid of the update condition, when used appropriately the array functions let you skip updating the loop counter in addition to the update condition, which is theoretically faster.
 
 This is one of the situations I've found where the situation is different in VM and YYC. In VM, using something like array_reduce is indeed faster than summing the elements in an array yourself using a for loop. However, in YYC the ranking is reversed. I don't know why this is, but I hypothesize it's because the loops themselves compile reasonably efficiently in YYC since they're 100% math, but the array functions have to run the callback every iteration, which has its own cost. In VM the rest of the code running slower means the callback overhead is less significant compared to everything around it.
 
