@@ -78,7 +78,7 @@ As a side note, sorting a list isn't something you should ever have to do in Gam
 
 ### Verdict
 
-Rewriting expensive logic using more efficient algorithms can yield substantial performance wins, but isn't always possible. (This is actually one of the biggest unsolved problems in computer science, although most games don't really deal with NP-hard problems very often.) Most of the time you should just design your game in a way that doesn't need this stuff in the first place.
+Rewriting expensive logic using more efficient algorithms can yield substantial performance wins, but isn't always possible. (This is actually one of the [biggest unsolved problems in computer science](https://en.wikipedia.org/wiki/P_versus_NP_problem), although most games don't really deal with NP-hard problems very often.) Most of the time you should just design your game in a way that doesn't need this stuff in the first place.
 
 &nbsp;
 
@@ -110,7 +110,7 @@ It's been done with pretty much everything in GameMaker over the years: arrays, 
 
 Admittedly, it does look nice. However, it doesn't actually add any new functionality that didn't already exist in GameMaker arrays. Meanwhile, each individual function call has a very small amount of performance overhead. I've clocked the amount of time it takes to invoke an individual function call to be in the ballpark of some tens of nanoseconds (yes, nanoseconds) on my Ryzen 9 9950X, which isn't a lot: this is the amount of time it takes a photon of light to travel about ten or twenty meters. However, if you expend that additional tens of nanoseconds every single time you call an array, perhaps thousands or tens of thousands of times per step, every single time you access an array, that can add up.
 
-Excessive abstraction is also a major part of why much software written today runs slower than software written twenty years ago for computers with a fraction of the power.
+Excessive abstraction is also a major part of why [much software written today](https://www.electronjs.org/) runs slower than software written twenty years ago for computers with a fraction of the power.
 
 ### Verdict
 
