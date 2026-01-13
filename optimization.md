@@ -363,3 +363,345 @@ This is one of the many examples of where looking at an individual piece of code
 ### Verdict
 
 Feel free to write your loops like this going forward, but I would recommend not going back and changing all of the ones you've already written. If your game is running slowly, this isn't going to help, unless your game is somehow nothing but empty for loops.
+
+&nbsp;
+
+## Using array functions instead of loops
+
+This is an extension of the last one. GameMaker has a few functional programming-related functions, most notably array reduce, filter, map, and foreach. (There are like a dozen others but they're less common.) If you know what those are, I don't have to explain them. If you don't know what those are, skip this section. Anyway, the draw here is that in addition to getting rid of the update condition, when used appropriately the array functions let you skip updating the loop counter in addition to the update condition, which is theoretically faster.
+
+This is one of the situations I've found where the situation is different in VM and YYC. In VM, using something like array_reduce is indeed faster than summing the elements in an array yourself using a for loop. However, in YYC the ranking is reversed. I don't know why this is, but I hypothesize it's because the loops themselves compile reasonably efficiently in YYC since they're 100% math, but the array functions have to run the callback every iteration, which has its own cost. In VM the rest of the code running slower means the callback overhead is less significant compared to everything around it.
+
+Lastly, even if you're running this in VM, if an array function is not the appropriate tool to use and you try to change your code to make it fit anyway, it's pretty easy to end up with bad code that's slower than if you'd left it alone to begin with. That's going to be a bit of a theme in the remainder of this tier list.
+
+I was tempted to throw this in C tier instead of B because it's 50/50 if this actually saves time or not and you can turn your code into a complete mess if you don't know what you're doing, but functional programmers don't get invited to parties so I figured I'd just give them one just this once.
+
+### Verdict
+
+If you like functional programming, go ahead and do it. If you don't like functional programming, don't bother. In most real-world cases they're pretty close to equivalent. Don't try to force an array function into a situation where it doesn't belong.
+
+&nbsp;
+
+## Obsessively minimizing batch breaks and texture swaps like they're a fire hazard
+
+Generally speaking not having every draw call in your game be its own vertex batch is a good thing, and reducing your vertex batch counts from 2,000 to, I dunno, 100 or so is usually but maybe not always going to help. Beyond that, there are diminishing returns. Cutting down from 100 batches to 20 might yield a small gain in some situations, but for any game that took longer than a few hours to make cutting down below that is going to be basically impossible. Mobile devices are a little more strict because battery and thermal constraints mean compromises have to be made, but in general on desktop if you make a full game by the time you get below a hundred batches or so the bottleneck is pretty much guaranteed to be something else.
+
+Most scenes in Wizarducks have 200-300 vertex batches and maybe a few dozen texture swaps, and that's still not the bottleneck on the Raspberry Pi.
+
+### Verdict
+
+If your game is running slowly and you've already cut your batches down to a reasonable level, don't worry about this unless you've ruled out pretty much everything else. Trying to min-max this by (for example) writing an overly complicated render queue system can make performance worse instead of better.
+
+&nbsp;
+
+# C tier: Optimizations that are really a placebo but mostly harmless
+
+None of these really do anything, but people think they do. On the plus side, doing these things won't mess up your game, so if it makes you feel better you can (usually) do them without anything bad happening.
+
+&nbsp;
+
+## Inlining code
+
+This one's really popular, and perhaps the placebo is worth as much as anything else.
+
+The idea behind inlining code is to avoid at least some of the overhead invoked by function calls themselves (see "avoid unnecessary abstractions") by telling the compiler to embed the code contained in the destination function directly, rather than referencing it elsewhere and forcing a jump and return. The logic is sound, and in years past this was a real optimization.
+
+In C and C++ there are various inline-related keywords that will tell the compiler to do this. In GameMaker there's a compiler directive that you can use in the function gml_pragma("forceinline").
+
+However, in most cases GameMaker won't actually do this. Inline directives are completely ignored in VM, and the YYC has a bit of a mind of its own, and may choose to ignore the inline directive if the embedded code would be too big or the context doesn't make sense. In theory it may choose to inline code that you didn't ask it to if it thinks this would be advantageous, but the exact rules surrounding this will vary from compiler to compiler and I have a feeling most of the time the overhead that the GML type system adds will make it too big for the compiler to deem worthy anyway.
+
+It's worth noting that even if this did work, there are some situations where inlining code can't work at all. Recursive functions can't be inlined for obvious reasons, and large, complex logic shouldn't be inlined because the size of the code would be massive. In particular, methods or functions referenced from variables can't be inlined, because these are indeterminate at compile time, which is when this process takes place; this means that abstractions discussed previously such as the Array class couldn't have their methods inlined even if GameMaker had better support for it, because the compiler can't make any guarantees about what code the methods reference at runtime.
+
+### Verdict
+
+I do wish inlining code worked on VM, because if it did it would probably make a measurable difference. Unfortunately it doesn't, and this is unlikely to change for the remainder of Current Runtime's lifespan. In YYC it can be used, but the compiler can choose to ignore it for its own reasons.
+
+You can always inline your code manually by copying and pasting blocks of code instead of calling a function. This sometimes works out and I have done it before, but the benefit of doing that is usually outweighed by the cost of having to maintain it.
+
+GMRT will be very different in this regard, and I wouldn't be surprised if some optimization like this appears in it. However, as of my writing this, this is pure speculation.
+
+Funnily enough, the placebo value might be worth as much as anything else here, because I've now seen quite a few episodes over the years where people try to optimize their code by inserting inline directives, assume it did something, and then move on to more important things.
+
+&nbsp;
+
+## Avoiding division
+
+There was a day when computer processors didn't actually have a hardware instruction for division, and programmers instead had to write long, dense routines to build a division algorithm out of smaller operations. Those days are long gone. I believe division in hardware is still slightly slower than multiplication and addition, but on the order of CPU cycles and not magnitudes. In GameMaker any difference is completely drowned out by statistical noise.
+
+### Verdict
+
+I'm not going to stop you from multiplying by 0.5 instead of dividing by 2, but it also isn't going to get you anywhere.
+
+&nbsp;
+
+## Instance pooling
+
+As discussed in the section about avoiding egregious memory allocations, creating and destroying a large amount of data constantly isn't a great idea. It stands to reason that this also goes for GameMaker instances in addition to data structures.
+
+Instance pooling is a technique which attempts to circumvent this in a similar way to the "results" argument to the matrix functions. In place of destroying an object you deactivate it and add it to a list (the "pool") of objects somewhere else. When you instantiate another object you first check if there's something available in the pool, and if there is, you use it (and activate it, and re-initialize any relevant variables) instead of instantiating a new one. This is really common in places such as bullet hell games, where hundreds or even thousands of individual bullet objects may come and go every few seconds.
+
+However, this doesn't do much in GameMaker. I don't actually have an explanation for this, but I’ve done a lot of tests that pretty much always show no difference. This is probably because GameMaker instances themselves are pretty lightweight (yes, including all of the built-in stuff that you probably don't use). In other engines such as Unity, there's usually a much larger memory footprint that comes with each and every GameObject such as transform information, renderer and instantiated material components, collision data, and all of the user scripts that you might want to use with it. GameMaker just has a few hundred bytes of variables, an entry in the collision structure, and whatever's in the Create event.
+
+Here's a little test project. If you comment out the pooling code and create and destroy instances instead, performance will be about the same.
+
+### Verdict
+
+Under ideal conditions it looks like instance pooling performs about the same as creating and destroying instances, so it doesn't matter. However, if you write bad instance pooling code, your performance will get worse instead of better.
+
+&nbsp;
+
+## Cropping whitespace off of sprites
+
+Sprites take up memory, and memory is a finite resource. It stands to reason that sprites that contain a lot of whitespace are just taking up space storing empty pixels, and that your game would use less memory if you cropped them all off.
+
+GameMaker's asset compiler already does this for you when you build your game (unless you check a box which disables it). Excess whitespace around sprites will be trimmed, and the vertex positions and UV coordinates of functions such as draw_sprite will be internally adjusted to compensate. You don't have to do anything to make this work.
+
+You can crop whitespace off it if you want, but it'll all be the same when your game runs.
+
+### Verdict
+
+This was a more common misconception in the early days of GameMaker Studio, because GameMaker 8 and earlier versions didn't do this, but I think by now most people are aware of it.
+
+&nbsp;
+
+# D tier: Optimizations that don't do anything but make your code harder to write, read, and debug
+
+These don't do anything for performance either, but unlike the items in the C tier, employing them will result in code that's sub-optimal from a "this is code that someone has to be able to read and write" perspective. Don't do these.
+
+&nbsp;
+
+## Branchless coding
+
+This went viral a few years ago when social media's compsci influencers (yes, those exist) discovered it. It was a huge mess.
+
+The reasoning is that a branch (ie an "if" statement, in any form) forces the CPU's instruction execution pipeline to potentially stop what it's doing, discard the next few instructions in the queue, jump to a new set of instructions, load them from memory, and proceed. There are some places where it's impossible to eliminate a branch from your code - for example, checking for input from the player - but there are times when you can remove it entirely with some clever/arcane math.
+
+As you've probably guessed by now, the GameMaker runtime adds too much overhead for you to have much control over this. The runtime's dynamic type system already has to do a bunch of conditional branches every time you use a variable, which isn't something you can do much about.
+
+I'm going to step outside the realm of GameMaker for a moment because compsci influencers annoy me and the fad actually ignores two of the really cool things that happen in modern computer architecture. Even when you're programming in a low-level language, "branchless coding" tends to fall apart for two reasons:
+
+1. Compilers are really smart. For simple conditional branches, even a basic level of compiler optimization is capable of removing the branch anyway, possibly generating faster code than you can by hand. Higher levels of compiler optimization are capable of more. Remove the -O1 in the compiler arguments to see what the original looks like.
+2. Modern CPUs have a feature called branch prediction, which will attempt to guess which path will be taken before you actually get there with a high degree of sophistication. This is one of several reasons for computers getting faster despite incremental advances in clock speeds over the last 15 years.
+
+The dynamics of this is slightly different in shaders, but for simple logic such as if (condition) a = b; else a = c; the shader compiler should hopefully be able to flatten that out in a more optimal way. Large branches with wildly divergent code paths are a very different story, but you can't un-branch those anyway. Those kinds of things are best avoided in shaders when possible, unless you're this guy.
+
+### Verdict
+
+This is the kind of code you write if you want job security from nobody else being able to figure out what tf your code is doing.
+
+&nbsp;
+
+## Unrolling loops
+
+This takes "branchless coding" a few steps farther, as all finite looping code constructions inherently have an if statement in them somewhere. If you have a loop with a deterministic number of repetitions, you can "unroll" the loop, which basically amounts to removing the loop by copying and pasting its contents 10, 20, 50, whatever times. The answer here is basically the same as the last one.
+
+### Verdict
+
+Why would you do this.
+
+&nbsp;
+
+## Using bitwise arithmetic instead of normal arithmetic
+
+I suspect the coolness factor of manipulating individual bits is a big part of why this one has stuck around.
+
+The situation here is exactly like in the C tier item "avoiding division," but I'm putting this one in the D tier because it also makes your code harder to read. See the benchmark chart in that section. It's very clear at a glance what writing n * 0.5 is supposed to do, but even if you know what the << operator does, using it in place of multiplication or division makes it unclear if you're actually working on something where bits are an accurate model of what you're dealing with, or if you're just trying to be cool.
+
+### Verdict
+
+Strictly speaking I have measured a small but consistent advantage of bitwise arithmetic over normal arithmetic... which works out to about 0.5 nanoseconds per instruction. That's how long it takes a photon of light to travel about 15 cm. It's not worth it.
+
+&nbsp;
+
+# F-minus tier: Optimizations that will actually make your code slower ("anti-optimizations")
+
+Is "anti-optimization" a thing that people say? It should be a thing that people say. We should start saying it, maybe then people will take them more seriously.
+
+&nbsp;
+
+## Avoiding built-in GameMaker features
+
+This is by far the most common anti-optimization that I've seen (although one of my friends believes that award should go to mismanaged use of instance deactivation).
+
+GameMaker object instances famously/infamously do a few things outside of your control, such as updating position based on speed and direction, processing Alarms, and a few other things. Over the years some people have perceived this as a source of slowdown, because if you don't make use of any of those automatic behaviors in your game their existence is nothing more than work that doesn't accomplish anything.
+
+Because of this, one of the other things that a lot of people really wanted to do when 2.3 hit - again, including me - was to replace GameMaker instances with structs entirely. This usually takes the form of creating structs with methods such as Step, Draw, DrawGUI, etc, inserting them into an array somewhere, and somewhere in the real event looping over the array to call the respective method, hoping that the amount of time saved by skipping the default behaviors would make a meaningful difference. Structs were originally introduced as "lightweight objects," after all.
+
+Aside from instances, other notable examples of built-in systems that I've seen people trying to re-implement over the years include:
+
+- Priority queues (heapsort)
+- A* on a grid (GameMaker doesn't include any non-grid-based pathfinding or more advanced grid pathfinding features built in, however, so if you want generic A* you have to do it yourself)
+- 2D Collisions
+- Depth sorting (avoiding depth = -y or depth = -bbox_bottom)
+- Matrices
+- The entire phylum of "fake 3D"
+
+It turns out that this does not work.
+
+While the execution of GML is slow, GameMaker's built-in systems are actually pretty fast. The runtime itself is implemented in C++ compiled to native code, and everything that happens between a function receiving the input parameters and returning the output is about as fast as you would expect from C++ compiled to native code. This also means that the time savings of more expensive runtime functions are more impressive vs equivalents implemented in GML.
+
+The built-in collision system is probably the most frequent casualty of this. In reality, the built-in collisions are so well-optimized that it would be pretty hard to build an equivalent that's faster without sacrificing features even if you used a language like C. Theoretical exceptions to this are HTML5, which doesn't use a world partition and just loops over every object for every collision check, and really old pre-GMS1 versions of GameMaker, which allegedly did the same but I never bothered to check.
+
+That all sucks, but it's possible that this will be less of a problem in GMRT. On top of GMRT being faster overall one of the things that has been said of it is that instances and structs will be much more similar, and to some extent be the same. As of my writing this it's still unclear what the extent of that will be, but of everything on this list this one is probably the most likely to need re-evaluation in the future.
+
+On the other hand, if performance is the same either way, by doing this you're still re-writing something that GameMaker already does for you, which probably still won't be the best use of your personal time.
+
+### Verdict
+
+Don't.
+
+&nbsp;
+
+## Avoiding trig by using your own approximation, fast inverse square root, other trendy math hax
+
+There are a few broad classes of anti-optimizations that people sometimes offer which all involve trying to outsmart math in some way, and I'm going to group them all together.
+
+I feel like by now we should have enough understanding of the situation to see why trying to re-implement something that already exists is not a good idea. I don't see this as often as I used to, but it still does the rounds on social media occasionally. A lot of it tends to stem from what was genuinely good advice 35 years ago, but doesn't stand up in the modern day.
+
+The most popular incarnation of this is probably the fast inverse square root. This is a trick made famous by Quake 3 Arena (1999), although the technique itself appears to go back at least to the 80s. It computes an inverse square root using an approximation of Newton's method. This would have been a real optimization on computers of the 90s, but modern hardware support for operations such as... uhh, fast inverse square root which will produce the same answer much more efficiently. I suspect a big reason for its continued popularity is the swearing in the comments, and also because you can make people pay attention to basically anything by slapping Carmack's name on it.
+
+GameMaker won't actually use a hardware inverse square root instruction, but even without that the results are pretty cut and dry.
+
+Other common targets of similar advice are normal square root (also a hardware instruction in modern computing) and trigonometry. The classic way of computing a cosine function involves a long and tedious taylor series, which you probably did by hand if you ever took a calculus class, and you probably hated because it takes far too long to converge. There's no special hardware circuitry to compute this, but the people who implement math libraries in programming languages are very smart and have a number of ways to speed things along - in fact, a lot of the usual tricks like pre-computing a lookup for common values are already at work in the C math library. For reasons we've already discussed, attempting to take similar shortcuts in GML will be much slower than using the runtime function which makes a call to a native math library.
+
+### Verdict
+
+No really, don't.
+
+&nbsp;
+
+## Entity-component system
+
+A widely observed phenomenon in the last 20-odd years is that CPU throughput has increased significantly, but memory access speed has only increased incrementally. By far the most interesting development in gaming hardware recently has been that of AMD's X3D CPUs. These look a lot like normal CPUs, except that they have a larger-than-usual amount of L3 cache, which is memory that's physically located on the CPU and therefore can be accessed much faster than main memory. We talked a bit about how this speeds things up in the Texture Compression section.
+
+A massive CPU cache is generally helpful on its own, but software that makes optimal use of it (deep breath) is architected such that the amount of data which has to be transferred from main memory to the cache is minimized. Imagine as a high-level description a game loop that uses a familiar OOP pattern. You might want to have a few methods belonging to each object, such as:
+
+```
+Move(): updates the position of the instance based on some rules
+CheckForCollisions(): are you touching anything else in the game world?
+CheckForDeath(): if you run out of health (maybe you got hit by too many monsters or something), you die
+```
+
+You probably also have a bunch of variables relevant to each, perhaps
+
+```
+x
+y
+z
+xspeed
+yspeed
+zspeed
+
+bounding box info
+
+health
+```
+
+Then in the step event, for every instance in the game, you would run through each one of those things in sequence.
+
+```
+For each instance
+    Move()
+    CheckForCollisions()
+    CheckForDeath()
+```
+
+This results in data (including the instructions that comprise your code) relevant to each method having to be fetched from memory each and every time you go over an instance. This can be surprisingly complicated behind the scenes, especially if you make heavy use of polymorphism/inheritance - different implementations of Move() for different objects might be stored in completely different places in memory. Would it be nice if you could call Move() on every object at once, and then CheckForCollisions() on every object at once, and then CheckForDeath() on every object at once?
+
+That's what ECS aims to do. Instead of having a single large object which contains everything, you have
+
+- components which store any variables which are relevant to the
+- system, which in one single shot will run on every component of a particular type that belongs to an
+- entity, which is a collection of components and basically the ECS analogue of a GameMaker instance
+
+Instead of defining things like Move() and CheckForCollisions() as a method which is bound to an instance of an object, they become a general function not tied to any instance of an object. Now, instead of having to repeatedly reference different chunks of code and data in sequence as we do in the object oriented paradigm, we can say
+
+```
+For each entity with a Movement component
+    Move(entity)
+
+For each entity with a Collision component
+    CheckForCollisions(entity)
+
+For each entity with a Health component
+    CheckForDeath(entity)
+```
+
+And of course since components are a simple collection of data, each of the components of the same type can be stored close to each other in memory (ie in a single array of structs), which likewise is more cache-friendly than having data for each instance scattered throughout the heap.
+
+Sounds great, yeah?
+
+So, you probably know what's coming by now. GameMaker operates on too high of a level for any of this to matter, and as we've now seen in many places, the overhead added by the runtime outweighs the benefits of being clever. If you were programming in a low-level language like C a struct of float x, y, z would be exactly twelve bytes, but in GameMaker it's a good deal more. Arrays of instances, structs, or components each have their own overhead. Iterating over an array of components has overhead, and by doing this, we can no longer use the significantly faster GameMaker instance loop.
+
+Here's a quote from Russell about data-oriented shenanigans in GameMaker from the Discord:
+
+> Data Oriented Optimizations are only good when you have a very small number of assembly instructions for a statement in the code and currently with GM (on current runtime) VM is something like 1000 (ish) assembly instructions for each VM instruction (each statement is at least 2 VM instructions) so you are very very far away from having any impact on the Data cache (D$) or isntruction cache (I$). YYC improves that and you get closer to 100:1 (ish) so that is a bit better but variable lookups are going through a hash table all the time and even a single lookup hits memory at least twice (in reality probably closer to 10 times or so) so that is going to change things again. I would not expect any DOO using GML.
+> 
+> Having said that we have GMRT improvements in an experimental change that will change things radically on lookups that may change these dynamics quite a bit. This is a similar technique to hidden classes in V8 and gives good improvements to the variable lookup that are showing promising results in our tests. 
+
+### Considerations unrelated to performance
+
+I'm usually pretty negative about ECS. Most of that is because people equate it with a free performance button, and in a lower-level language it certainly can be (although it's still possible to write inefficient ECS code). However, there are other reasons to use ECS, and component architecture in general: it's a different - and some would argue, better - organizational tool.
+
+Object-oriented programming is nice because it creates a mental model of software, and games in particular, which maps pretty cleanly onto objects in the real world. This makes it easy to talk about: a dog is a mammal, and it can do behaviors like bark, jump, and wag its tail. There's a reason this has been taught in introductory computer science classes for about a billion years. (Is it really 2026 and nobody's come up with a better metaphor for OOP yet?)
+
+However, object-oriented programming tends to fall over on itself when you have a lot of it. I'm sure we've all had an experience where we have one object inherit from another and all of the sudden we can't remember which level of inheritance a variable or method was defined in. Maybe you make a small change in the middle of the inheritance tree, and a few weeks later you realize that one of its descendants broke and you don't know why. Component architectures make this problem go away become smaller because they enforce a separation of responsibilities. Each component only should do one thing, and the inheritance hierarchy is much flatter - if it exists at all. It's more work to set up initially, but under ideal conditions it creates less technical debt as development progresses.
+
+Some people prefer component architectures for this reason alone. However, in GameMaker it IS a drain on performance, and since this is an optimization tier list and not a how-clean-is-your-desktop tier list it's going in the F tier.
+
+### Other resources
+
+There's a lot of literature on ECS out there now. People who use Rust seem especially into it. This is because people who use Rust are inherently attracted to hammers that are looking for nails.
+
+Anyway if you're into designing component systems, here's a list of articles I found on it that I thought were useful. Note that all of these authors list compelling reasons in favor of ECS besides performance.
+
+- Mark Saroufim: Entity Component System is all you need?
+- Austin Morlan: A simple entity component system
+- UMLBoard: Entity component system, an architectural pattern
+- Ariel Coppes: Design decisions when building games using ECS
+
+### Verdict
+
+If you enjoy the design pattern I won't stop you, some people just really like this kind of architecture, but in GameMaker it does have a serious impact on performance.
+
+This might change in GMRT as the runtime itself becomes much leaner; it's actually one of the things I'm more interested in trialing once GMRT is officially production-worthy. However, as with everything else I've said "maybe in GMRT" about so far, we simply don't know at the current moment.
+
+&nbsp;
+
+## Untiered: Juju Adams Pseudo-Objects
+
+I couldn't decide what tier to put this in, because it's highly situational and it can make things worse if you don't know what you're doing.
+
+I've dedicated a few paragraphs to roasting things like "avoiding GameMaker systems" and "ECS" now, but I haven't mentioned that there's a way to make GameMaker do batch operations on large amounts of data at once: ds_grids.
+
+It's cool and hip and trendy to dunk on data structures now that we have structs, but grids in particular are pretty underappreciated. Most people treat them like big ol 2D arrays which is fine... I guess... but their real power is the ability to do math operations on large blocks of data at once. The closest comparison is probably, of all things, x86's vector intrinsics (although the runtime absolutely does not use those internally). It's also vaguely ECS-y.
+
+If you have a hundred numbers that you want to add, subtract, multiply, or evaluate the mean, min, or max, these are much faster than doing it by hand.
+
+You can use this to speed up small, simple, repetitive pieces of data that don't have complex logic attached to them. The example in the article talks about simple grass objects or bullet hell bullets, and also Scribble. If you can minimize the number of times you have to set or fetch individual values and maximize the amount of work done with the grid region functions, you can save some time.
+
+Iterating over the grid yourself should be avoided whenever possible; Juju uses sprite asset layers to lessen the burden of manual drawing.
+
+In particular, you'll note that you can't use GameMaker's collision system with this. Be careful with this. If your pseudo-objects require collision you have to implement them yourself, and if you're not careful this can wind up being slower than just using regular objects. Typically you'll find that much cheating and loose approximations need to be done to make collisions not cause the whole thing to be slower than using GameMaker objects.
+
+### Verdict
+
+There are a LOT of trade-offs required here, and this isn't something you can duct-tape onto all games. Using it in a place where it isn't appropriate will make your game slower, and not faster. Pseudo-objects also - obviously - don't support any of the features of real GameMaker objects, like collisions or a Step or Draw event.
+
+Only attempt this if you understand all of the other items on this list like the back of your hand. If you do, profile and test very aggressively to make sure you're actually speeding things up without any side-effects.
+
+A lot of the time, "having fewer grass objects" will be a better optimization to begin with.
+
+&nbsp;
+
+# Z tier: This isn't an optimization
+
+## Fixed timestep/delta time
+
+What? Why do people call this an "optimization?" Delta time and fixed timesteps are sometimes useful for a few things, but calling it an optimization is like fixing a broken window by hanging a beach towel over it. You can use a fixed time step to make frame rates that are consistently between 30-40 fps feel a little smoother than they otherwise would, but you haven't "optimized" anything, you just made it a little harder to notice. By all means do this if you want, just don't call it an optimization.
+
+&nbsp;
+
+# I can't believe how long that went on for
+
+Wow, you actually read all that? Nice. I should print out certificates or something for people who actually read all that. Unless you skipped to the bottom, which some people probably did. But not you, right?
