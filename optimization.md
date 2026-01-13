@@ -618,6 +618,40 @@ In C and C++ there are various inline-related keywords that will tell the compil
 
 However, in most cases GameMaker won't actually do this. Inline directives are completely ignored in VM, and the YYC has a bit of a mind of its own, and may choose to ignore the inline directive if the embedded code would be too big or the context doesn't make sense. In theory it may [choose to inline code that you didn't ask it to](https://stackoverflow.com/questions/7223993/will-c-linker-automatically-inline-functions-without-inline-keyword-withou) if it thinks this would be advantageous, but the exact rules surrounding this will vary from compiler to compiler and I have a feeling most of the time the overhead that the GML type system adds will make it too big for the compiler to deem worthy anyway.
 
+<details>
+
+<summary>this is interesting isnt it</summary>
+
+We're going to break out the [VM bytecode](https://youtu.be/6_PXIU37Yyw) for this one.
+
+Given this code:
+
+```gml
+function add_inline(a, b) {
+    gml_pragma("forceinline");
+    return a + b;
+}
+
+function add(a, b) {
+    return a + b;
+}
+
+var n = add(10, 20);
+var m = add_inline(10, 20);
+```
+
+The GameMaker asset compiler will produce the following bytecode:
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/inline_code/bytecode.png)
+
+Note that both functions are identical, both in how they're defined and in what happens when you call them.
+
+In YYC, functions with the inline pragma will add platform-dependent "inline" instructions to the generated C++, but it's pretty hard to tell if the LLVM compiler actually does anything with it without actually disassembling the whole program. The reason I'm inclined to think it almost never does anything is because the above two functions perform exactly the same.
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/inline_code/inline.png)
+
+</details>
+
 It's worth noting that even if this did work, there are some situations where inlining code can't work at all. Recursive functions can't be inlined for obvious reasons, and large, complex logic shouldn't be inlined because the size of the code would be massive. In particular, methods or functions referenced from variables can't be inlined, because these are indeterminate at compile time, which is when this process takes place; this means that abstractions discussed previously such as the Array class couldn't have their methods inlined even if GameMaker had better support for it, because the compiler can't make any guarantees about what code the methods reference at runtime.
 
 ### Verdict
@@ -634,7 +668,15 @@ Funnily enough, the placebo value might be worth as much as anything else here, 
 
 ## Avoiding division
 
-There was a day when computer processors didn't actually have a hardware instruction for division, and programmers instead had to write long, dense routines to build a division algorithm out of smaller operations. Those days are long gone. I believe division in hardware is still slightly slower than multiplication and addition, but on the order of CPU cycles and not magnitudes. In GameMaker any difference is completely drowned out by statistical noise.
+There was a day when computer processors didn't actually have a hardware instruction for division, and programmers instead had to write [long, dense routines](https://stackoverflow.com/questions/51411251/fast-signed-16-bit-divide-by-7-for-6502) to build a division algorithm out of smaller operations. [Those days are long gone](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html). I believe division in hardware is still slightly slower than multiplication and addition, but on the order of CPU cycles and not magnitudes. In GameMaker any difference is completely drowned out by statistical noise.
+
+<details>
+
+<summary>an exercise in futility</summary>
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/avoiding_division/meh.png)
+
+</details>
 
 ### Verdict
 
@@ -646,11 +688,11 @@ I'm not going to stop you from multiplying by 0.5 instead of dividing by 2, but 
 
 As discussed in the section about avoiding egregious memory allocations, creating and destroying a large amount of data constantly isn't a great idea. It stands to reason that this also goes for GameMaker instances in addition to data structures.
 
-Instance pooling is a technique which attempts to circumvent this in a similar way to the "results" argument to the matrix functions. In place of destroying an object you deactivate it and add it to a list (the "pool") of objects somewhere else. When you instantiate another object you first check if there's something available in the pool, and if there is, you use it (and activate it, and re-initialize any relevant variables) instead of instantiating a new one. This is really common in places such as bullet hell games, where hundreds or even thousands of individual bullet objects may come and go every few seconds.
+[Instance pooling](https://gameprogrammingpatterns.com/object-pool.html) is a technique which attempts to circumvent this in a similar way to the "results" argument to the matrix functions. In place of destroying an object you deactivate it and add it to a list (the "pool") of objects somewhere else. When you instantiate another object you first check if there's something available in the pool, and if there is, you use it (and activate it, and re-initialize any relevant variables) instead of instantiating a new one. This is really common in places such as bullet hell games, where hundreds or even thousands of individual bullet objects may come and go every few seconds.
 
 However, this doesn't do much in GameMaker. I don't actually have an explanation for this, but I’ve done a lot of tests that pretty much always show no difference. This is probably because GameMaker instances themselves are pretty lightweight (yes, including all of the built-in stuff that you probably don't use). In other engines such as Unity, there's usually a much larger memory footprint that comes with each and every GameObject such as transform information, renderer and instantiated material components, collision data, and all of the user scripts that you might want to use with it. GameMaker just has a few hundred bytes of variables, an entry in the collision structure, and whatever's in the Create event.
 
-Here's a little test project. If you comment out the pooling code and create and destroy instances instead, performance will be about the same.
+[Here's a little test project](https://drive.google.com/file/d/1ApAyWAXc7tT5KuOv2M_yUHQha6NpRq31/view?usp=sharing). If you comment out the pooling code and create and destroy instances instead, performance will be about the same.
 
 ### Verdict
 
@@ -665,6 +707,20 @@ Sprites take up memory, and memory is a finite resource. It stands to reason tha
 GameMaker's asset compiler already does this for you when you build your game (unless you check a box which disables it). Excess whitespace around sprites will be trimmed, and the vertex positions and UV coordinates of functions such as draw_sprite will be internally adjusted to compensate. You don't have to do anything to make this work.
 
 You can crop whitespace off it if you want, but it'll all be the same when your game runs.
+
+<details>
+
+<summary>this is what your game sees</summary>
+
+You can have sprites with a lot of empty space like this...
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/cropped_sprites/source_sprites.png)
+
+...but the asset compiler will trim it off, so that what's actually stored by the game is simply this.
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/cropped_sprites/texture_page.png)
+
+</details>
 
 ### Verdict
 
@@ -688,10 +744,11 @@ As you've probably guessed by now, the GameMaker runtime adds too much overhead 
 
 I'm going to step outside the realm of GameMaker for a moment because compsci influencers annoy me and the fad actually ignores two of the really cool things that happen in modern computer architecture. Even when you're programming in a low-level language, "branchless coding" tends to fall apart for two reasons:
 
-1. Compilers are really smart. For simple conditional branches, even a basic level of compiler optimization is capable of removing the branch anyway, possibly generating faster code than you can by hand. Higher levels of compiler optimization are capable of more. Remove the -O1 in the compiler arguments to see what the original looks like.
-2. Modern CPUs have a feature called branch prediction, which will attempt to guess which path will be taken before you actually get there with a high degree of sophistication. This is one of several reasons for computers getting faster despite incremental advances in clock speeds over the last 15 years.
+1. Compilers are really smart. For simple conditional branches, even a [basic level of compiler optimization](https://godbolt.org/z/v78eqoTqc) is capable of removing the branch anyway, possibly generating faster code than you can by hand. Higher levels of compiler optimization are capable of more. Remove the -O1 in the compiler arguments to see what the original looks like.
 
-The dynamics of this is slightly different in shaders, but for simple logic such as if (condition) a = b; else a = c; the shader compiler should hopefully be able to flatten that out in a more optimal way. Large branches with wildly divergent code paths are a very different story, but you can't un-branch those anyway. Those kinds of things are best avoided in shaders when possible, unless you're this guy.
+2. Modern CPUs have a feature called [branch prediction](https://www.youtube.com/watch?v=nczJ58WvtYo&list=PLzH6n4zXuckpwdGMHgRH5N9xNHzVGCxwf&index=5), which will attempt to guess which path will be taken before you actually get there with a high degree of sophistication. This is one of several reasons for computers getting faster despite incremental advances in clock speeds over the last 15 years.
+
+The dynamics of this is slightly different in shaders, but for simple logic such as if (condition) a = b; else a = c; the shader compiler should hopefully be able to flatten that out in a more optimal way. Large branches with wildly divergent code paths are a very different story, but you can't un-branch those anyway. Those kinds of things are best avoided in shaders when possible, unless you're [this guy](https://bsky.app/profile/xordev.com).
 
 ### Verdict
 
@@ -703,6 +760,48 @@ This is the kind of code you write if you want job security from nobody else bei
 
 This takes "branchless coding" a few steps farther, as all finite looping code constructions inherently have an if statement in them somewhere. If you have a loop with a deterministic number of repetitions, you can "unroll" the loop, which basically amounts to removing the loop by copying and pasting its contents 10, 20, 50, whatever times. The answer here is basically the same as the last one.
 
+<details>
+
+<summary>this is the dumbest-looking benchmark code I've ever written</summary>
+
+```gml
+new Benchmark("Unrolled Loops", [
+    new TestCase("repeat (128)", function(iterations) {
+        var n = 0;
+        repeat (iterations) {
+            repeat (128) {
+                n++;
+            }
+        }
+    }),
+    new TestCase("128 individual ops", function(iterations) {
+        var n = 0;
+        repeat (iterations) {
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+            n++; n++; n++; n++; n++; n++; n++; n++;
+        }
+    })
+])
+```
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/unrolled_loops/its_the_same_picture.png)
+
+</details>
+
 ### Verdict
 
 Why would you do this.
@@ -713,7 +812,7 @@ Why would you do this.
 
 I suspect the coolness factor of manipulating individual bits is a big part of why this one has stuck around.
 
-The situation here is exactly like in the C tier item "avoiding division," but I'm putting this one in the D tier because it also makes your code harder to read. See the benchmark chart in that section. It's very clear at a glance what writing n * 0.5 is supposed to do, but even if you know what the << operator does, using it in place of multiplication or division makes it unclear if you're actually working on something where bits are an accurate model of what you're dealing with, or if you're just trying to be cool.
+The situation here is exactly like in the C tier item "avoiding division," but I'm putting this one in the D tier because it also makes your code harder to read. See the benchmark chart in that section. It's very clear at a glance what writing `n * 0.5` is supposed to do, but even if you know what the `<<` operator does, using it in place of multiplication or division makes it unclear if you're actually working on something where [bits are an accurate model of what you're dealing with](https://en.wikipedia.org/wiki/Flag_(programming)), or if you're just trying to be cool.
 
 ### Verdict
 
@@ -748,7 +847,27 @@ It turns out that this does not work.
 
 While the execution of GML is slow, GameMaker's built-in systems are actually pretty fast. The runtime itself is implemented in C++ compiled to native code, and everything that happens between a function receiving the input parameters and returning the output is about as fast as you would expect from C++ compiled to native code. This also means that the time savings of more expensive runtime functions are more impressive vs equivalents implemented in GML.
 
-The built-in collision system is probably the most frequent casualty of this. In reality, the built-in collisions are so well-optimized that it would be pretty hard to build an equivalent that's faster without sacrificing features even if you used a language like C. Theoretical exceptions to this are HTML5, which doesn't use a world partition and just loops over every object for every collision check, and really old pre-GMS1 versions of GameMaker, which allegedly did the same but I never bothered to check.
+The built-in [collision system](https://en.wikipedia.org/wiki/R-tree) is probably the most frequent casualty of this. In reality, the built-in collisions are so well-optimized that it would be pretty hard to build an equivalent that's faster without sacrificing features even if you used a language like C. Theoretical exceptions to this are HTML5, which doesn't use a world partition and just loops over every object for every collision check, and really old pre-GMS1 versions of GameMaker, which allegedly did the same but I never bothered to check.
+
+<details>
+
+<summary>it's more work AND it doesn't perform as well</summary>
+
+Here's a sample scene with 5000 random squares which rotate over time; each frame takes about 1.1 ms (Step + Draw)
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/let_gm_do_gm_things/instances.png)
+
+here's (approximately) the same scene but with structs pretending to be GameMaker instances; each frame now takes about 3.3 ms (Step + Draw)
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/let_gm_do_gm_things/structs.png)
+
+You can squeeze it down to about 2.2 ms by replacing the method calls with their code directly, but that's still twice as slow as the original - plus, since Step and Draw here serves the purpose of encapsulating code that you could call elsewhere, this would not technically qualify as an "unnecessary abstraction," as doing so loses you functionality.
+
+I've never seen anyone actually doing this specifically, but rather because GameMaker didn’t have a built-in function to invert a matrix until relatively recently. However, I think it illustrates the point nicely, so here's a bonus benchmark for what it looks like to use the matrix_inverse function vs implementing it in GML:
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/let_gm_do_gm_things/matrix_inverse.png)
+
+</details>
 
 That all sucks, but it's possible that this will be less of a problem in GMRT. On top of GMRT being faster overall one of the things that has been said of it is that instances and structs will be much more similar, and to some extent be the same. As of my writing this it's still unclear what the extent of that will be, but of everything on this list this one is probably the most likely to need re-evaluation in the future.
 
@@ -766,11 +885,87 @@ There are a few broad classes of anti-optimizations that people sometimes offer 
 
 I feel like by now we should have enough understanding of the situation to see why trying to re-implement something that already exists is not a good idea. I don't see this as often as I used to, but it still does the rounds on social media occasionally. A lot of it tends to stem from what was genuinely good advice 35 years ago, but doesn't stand up in the modern day.
 
-The most popular incarnation of this is probably the fast inverse square root. This is a trick made famous by Quake 3 Arena (1999), although the technique itself appears to go back at least to the 80s. It computes an inverse square root using an approximation of Newton's method. This would have been a real optimization on computers of the 90s, but modern hardware support for operations such as... uhh, fast inverse square root which will produce the same answer much more efficiently. I suspect a big reason for its continued popularity is the swearing in the comments, and also because you can make people pay attention to basically anything by slapping Carmack's name on it.
+The most popular incarnation of this is probably the [fast inverse square root](https://en.wikipedia.org/wiki/Fast_inverse_square_root). This is a trick made famous by Quake 3 Arena (1999), although the technique itself appears to go back at least to the 80s. It computes an inverse square root using an approximation of [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method). This would have been a real optimization on computers of the 90s, but modern hardware support for operations such as... uhh, [fast inverse square root](https://docs.oracle.com/cd/E37838_01/html/E61064/eojde.html#:~:text=compute%20reciprocal%20of%20square%20root%20of%20scalar%20single%2Dprecision%20floating%2Dpoint%20values) which will produce the same answer much more efficiently. I suspect a big reason for its continued popularity is the swearing in the comments, and also because you can make people pay attention to basically anything by slapping Carmack's name on it.
 
 GameMaker won't actually use a hardware inverse square root instruction, but even without that the results are pretty cut and dry.
 
-Other common targets of similar advice are normal square root (also a hardware instruction in modern computing) and trigonometry. The classic way of computing a cosine function involves a long and tedious taylor series, which you probably did by hand if you ever took a calculus class, and you probably hated because it takes far too long to converge. There's no special hardware circuitry to compute this, but the people who implement math libraries in programming languages are very smart and have a number of ways to speed things along - in fact, a lot of the usual tricks like pre-computing a lookup for common values are already at work in the C math library. For reasons we've already discussed, attempting to take similar shortcuts in GML will be much slower than using the runtime function which makes a call to a native math library.
+<details>
+
+<summary>place your bets</summary>
+
+You can't directly cast numeric types in GML the way you can in C, so to implement Quake rsqrt you have to get a little creative with buffer types. This doesn't help, but even without that this code would be significantly slower than doing it the normal way.
+
+```gml
+function Q_rsqrt(number)
+{
+    var i;
+    var x2, yy;
+    var threehalfs = 1.5;
+
+    var b = buffer_create(4, buffer_fixed, 4);
+
+    x2 = number * 0.5;
+    yy = number;
+
+    buffer_poke(b, 0, buffer_f32, yy);
+
+    i  = buffer_peek(b, 0, buffer_s32);         // evil floating point bit level hacking
+    i  = 0x5f3759df - ( i >> 1 );               // what the (◡‿◡✿)?
+
+    buffer_poke(b, 0, buffer_s32, i);
+
+    yy  = buffer_peek(b, 0, buffer_f32);
+    yy  = yy * ( threehalfs - ( x2 * yy * yy ) );   // 1st iteration
+//    y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
+
+    buffer_delete(b);
+
+    return yy;
+}
+```
+
+It's possible to optimize the routine a bit in minor ways.
+
+```gml
+
+
+function Q_rsqrt_optimizedforgamemaker(number)
+{
+    var i;
+    var x2;
+    #macro qrsqrt_threehalfs 1.5
+
+    static b = buffer_create(4, buffer_fixed, 4);
+
+    x2 = number / 2;
+
+    buffer_poke(b, 0, buffer_f32, number);
+    i  = 0x5f3759df - (buffer_peek(b, 0, buffer_s32) >> 1);
+    buffer_poke(b, 0, buffer_s32, i);
+    number  = buffer_peek(b, 0, buffer_f32);
+    number  = number * ( qrsqrt_threehalfs - ( x2 * sqr(number) ) );
+
+    return number;
+}
+```
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/math_hax/q_sqrt.png)
+
+The results speak for themselves.
+
+</details>
+
+Other common targets of similar advice are normal square root (also a [hardware instruction](https://docs.oracle.com/cd/E37838_01/html/E61064/eoizy.html#scrolltoc:~:text=FSQRT-,square%20root,-fsub) in modern computing) and trigonometry. The classic way of computing a cosine function involves a long and tedious [taylor series](https://en.wikipedia.org/wiki/Sine_and_cosine#Series_and_polynomials), which you probably did by hand if you ever took a calculus class, and you probably hated because it takes far too long to converge. There's no special hardware circuitry to compute this, but the people who implement [math libraries in programming languages](https://sourceware.org/git/?p=glibc.git;a=blob;f=sysdeps/ieee754/dbl-64/s_sin.c;hb=HEAD) are very smart and have a number of ways to speed things along - in fact, a lot of the usual tricks like pre-computing a lookup for common values are already at work in the C math library. For reasons we've already discussed, attempting to take similar shortcuts in GML will be much slower than using the runtime function which makes a call to a native math library.
+
+<details>
+
+<summary>i'm too lazy to write code that attempts to circumvent sine so here's a chart of how various math operations compare to each other</summary>
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/math_hax/math_functions.png)
+
+All functions are much closer together in VM, as the cost of the operations themselves remain the same but the VM adds extra overhead in calling code.
+
+</details>
 
 ### Verdict
 
@@ -780,7 +975,7 @@ No really, don't.
 
 ## Entity-component system
 
-A widely observed phenomenon in the last 20-odd years is that CPU throughput has increased significantly, but memory access speed has only increased incrementally. By far the most interesting development in gaming hardware recently has been that of AMD's X3D CPUs. These look a lot like normal CPUs, except that they have a larger-than-usual amount of L3 cache, which is memory that's physically located on the CPU and therefore can be accessed much faster than main memory. We talked a bit about how this speeds things up in the Texture Compression section.
+A widely observed phenomenon in the last 20-odd years is that CPU throughput has increased significantly, but memory access speed has only increased incrementally. By far the most interesting development in gaming hardware recently has been that of [AMD's X3D CPUs](https://www.amd.com/en/products/processors/desktops/ryzen/5000-series/amd-ryzen-7-5800x3d.html). These look a lot like normal CPUs, except that they have a larger-than-usual amount of L3 cache, which is memory that's physically located on the CPU and therefore can be accessed much faster than main memory. We talked a bit about how this speeds things up in the Texture Compression section.
 
 A massive CPU cache is generally helpful on its own, but software that makes optimal use of it (deep breath) is architected such that the amount of data which has to be transferred from main memory to the cache is minimized. Imagine as a high-level description a game loop that uses a familiar OOP pattern. You might want to have a few methods belonging to each object, such as:
 
@@ -863,10 +1058,10 @@ There's a lot of literature on ECS out there now. People who use Rust seem espec
 
 Anyway if you're into designing component systems, here's a list of articles I found on it that I thought were useful. Note that all of these authors list compelling reasons in favor of ECS besides performance.
 
-- Mark Saroufim: Entity Component System is all you need?
-- Austin Morlan: A simple entity component system
-- UMLBoard: Entity component system, an architectural pattern
-- Ariel Coppes: Design decisions when building games using ECS
+- [Mark Saroufim: Entity Component System is all you need?](https://marksaroufim.medium.com/entity-component-system-is-all-you-need-884f972bd867)
+- [Austin Morlan: A simple entity component system](https://austinmorlan.com/posts/entity_component_system/)
+- [UMLBoard: Entity component system, an architectural pattern](https://www.umlboard.com/design-patterns/entity-component-system.html)
+- [Ariel Coppes: Design decisions when building games using ECS](https://arielcoppes.dev/2023/07/13/design-decisions-when-building-games-using-ecs.html)
 
 ### Verdict
 
@@ -876,15 +1071,68 @@ This might change in GMRT as the runtime itself becomes much leaner; it's actual
 
 &nbsp;
 
-## Untiered: Juju Adams Pseudo-Objects
+## Untiered: [Juju Adams Pseudo-Objects](https://github.com/JujuAdams/ThoughtsOnGameMaker/blob/main/technique-7-pseudo-objects.md)
 
 I couldn't decide what tier to put this in, because it's highly situational and it can make things worse if you don't know what you're doing.
 
-I've dedicated a few paragraphs to roasting things like "avoiding GameMaker systems" and "ECS" now, but I haven't mentioned that there's a way to make GameMaker do batch operations on large amounts of data at once: ds_grids.
+I've dedicated a few paragraphs to roasting things like "avoiding GameMaker systems" and "ECS" now, but I haven't mentioned that there's a way to make GameMaker do batch operations on large amounts of data at once: [ds_grids](https://manual.gamemaker.io/beta/en/GameMaker_Language/GML_Reference/Data_Structures/DS_Grids/DS_Grids.htm).
 
-It's cool and hip and trendy to dunk on data structures now that we have structs, but grids in particular are pretty underappreciated. Most people treat them like big ol 2D arrays which is fine... I guess... but their real power is the ability to do math operations on large blocks of data at once. The closest comparison is probably, of all things, x86's vector intrinsics (although the runtime absolutely does not use those internally). It's also vaguely ECS-y.
+It's cool and hip and trendy to dunk on data structures now that we have structs, but grids in particular are pretty underappreciated. Most people treat them like big ol 2D arrays which is fine... I guess... but their real power is the ability to do math operations on large blocks of data at once. The closest comparison is probably, of all things, [x86's vector intrinsics](https://learn.microsoft.com/en-us/cpp/intrinsics/x64-amd64-intrinsics-list?view=msvc-170) (although the runtime absolutely does not use those internally). It's also vaguely ECS-y.
 
 If you have a hundred numbers that you want to add, subtract, multiply, or evaluate the mean, min, or max, these are much faster than doing it by hand.
+
+<details>
+
+<summary>graphs</summary>
+
+There are four different tests here,
+
+```gml
+new Benchmark("Grid operations", [
+    new TestCase("ds_grid_add_region, 1000 values", function(iterations) {
+        var grid = ds_grid_create(1000, 1);
+        var n = 10;
+        repeat (iterations) {
+            ds_grid_add_region(grid, 0, 0, 999, 0, n);
+        }
+        ds_grid_destroy(grid);
+    }),
+    new TestCase("adding 1000 values in gml", function(iterations) {
+        var array = array_create(1000);
+        var n = 10;
+        repeat (iterations) {
+            for (var i = 0; i < 1000; i++) {
+                array[i] += n;
+            }
+        }
+    }),
+    new TestCase("ds_grid_get_mean, 1000 values", function(iterations) {
+        var grid = ds_grid_create(1000, 1);
+        repeat (iterations) {
+            var m = ds_grid_get_mean(grid, 0, 0, 999, 0);
+        }
+        ds_grid_destroy(grid);
+    }),
+    new TestCase("average of 1000 values in gml", function(iterations) {
+        var array = array_create(1000);
+        var t = 0;
+        repeat (iterations) {
+            for (var i = 0; i < 1000; i++) {
+                t += array[i];
+            }
+            var m = t / 1000;
+        }
+    })
+]),
+```
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/pseudoobjects/benchmark_grid_functions.png)
+
+There are a bunch of other grid functions that may or may not be applicable, especially operations on a disk or region, but I won't be testing them all here because my train leaves for Magfest in about 18 hours and I've done zero packing.
+
+(Counterintuitively, the reason that adding 1000 values is slower than taking the average is because array[i] += n implicitly invokes an array_get and an array_set, while taking the average only invokes an array_get and addition with a local.)
+
+</details>
 
 You can use this to speed up small, simple, repetitive pieces of data that don't have complex logic attached to them. The example in the article talks about simple grass objects or bullet hell bullets, and also Scribble. If you can minimize the number of times you have to set or fetch individual values and maximize the amount of work done with the grid region functions, you can save some time.
 
@@ -899,6 +1147,8 @@ There are a LOT of trade-offs required here, and this isn't something you can du
 Only attempt this if you understand all of the other items on this list like the back of your hand. If you do, profile and test very aggressively to make sure you're actually speeding things up without any side-effects.
 
 A lot of the time, "having fewer grass objects" will be a better optimization to begin with.
+
+![](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/pseudoobjects/flowerdensity.png)
 
 &nbsp;
 
