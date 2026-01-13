@@ -44,7 +44,7 @@ The YYC module should detect changed files and only recompile those needed but i
 
 ## Performance
 
-### How do I make my game run smoother?
+### How do I make my game run faster and smoother?
 This is called "optimization". [DragoniteSpam](https://github.com/DragoniteSpam/) wrote an excellent [post](https://forum.gamemaker.io/index.php?threads/the-ultimate-gamemaker-optimization-tier-list.122141/) on the GMC which has been [archived on GitHub here](optimization.md).
 
 &nbsp;
