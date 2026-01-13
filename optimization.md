@@ -541,6 +541,45 @@ This is an extension of the last one. GameMaker has a few [functional programmin
 
 This is one of the situations I've found where the situation is different in VM and YYC. In VM, using something like array_reduce is indeed faster than summing the elements in an array yourself using a for loop. However, in YYC the ranking is reversed. I don't know why this is, but I hypothesize it's because the loops themselves compile reasonably efficiently in YYC since they're 100% math, but the array functions have to run the callback every iteration, which has its own cost. In VM the rest of the code running slower means the callback overhead is less significant compared to everything around it.
 
+<details>
+
+<summary>this is interesting isnt it</summary>
+
+The benchmark code used here is
+
+```gml
+new Benchmark("Array functions", [
+    new TestCase("the classic way", function(iterations) {
+        var test_array = array_create(iterations);
+        var n = 0;
+        for (var i = 0; i < array_length(test_array); i++) {
+            n += test_array[i] * 10 + 1;
+        }
+    }),
+    new TestCase("repeat loop", function(iterations) {
+        var test_array = array_create(iterations);
+        var n = 0;
+        var i = 0;
+        repeat (array_length(test_array)) {
+            n += test_array[i] * 10 + 1;
+            i++;
+        }
+    }),
+    new TestCase("array reduce", function(iterations) {
+        var test_array = array_create(iterations);
+        var n = array_reduce(test_array, function(previous, value) {
+            return previous + (value * 10 + 1);
+        }, 0);
+    })
+])
+```
+
+![](https://github.com/DragoniteSpam/GameMakerOptimizationTierList/blob/master/images/array_functions/array_reduce_yyc.png?raw=true)
+
+![](https://github.com/DragoniteSpam/GameMakerOptimizationTierList/blob/master/images/array_functions/array_reduce_vm.png?raw=true)
+
+</details>
+
 Lastly, even if you're running this in VM, if an array function is not the appropriate tool to use and you try to change your code to make it fit anyway, it's pretty easy to end up with bad code that's slower than if you'd left it alone to begin with. That's going to be a bit of a theme in the remainder of this tier list.
 
 I was tempted to throw this in C tier instead of B because it's 50/50 if this actually saves time or not and you can turn your code into a complete mess if you don't know what you're doing, but functional programmers don't get invited to parties so I figured I'd just give them one just this once.
@@ -577,7 +616,7 @@ The idea behind inlining code is to avoid at least some of the overhead invoked 
 
 In C and C++ there are various inline-related keywords that will tell the compiler to do this. In GameMaker there's a compiler directive that you can use in the function gml_pragma("forceinline").
 
-However, in most cases GameMaker won't actually do this. Inline directives are completely ignored in VM, and the YYC has a bit of a mind of its own, and may choose to ignore the inline directive if the embedded code would be too big or the context doesn't make sense. In theory it may choose to inline code that you didn't ask it to if it thinks this would be advantageous, but the exact rules surrounding this will vary from compiler to compiler and I have a feeling most of the time the overhead that the GML type system adds will make it too big for the compiler to deem worthy anyway.
+However, in most cases GameMaker won't actually do this. Inline directives are completely ignored in VM, and the YYC has a bit of a mind of its own, and may choose to ignore the inline directive if the embedded code would be too big or the context doesn't make sense. In theory it may [choose to inline code that you didn't ask it to](https://stackoverflow.com/questions/7223993/will-c-linker-automatically-inline-functions-without-inline-keyword-withou) if it thinks this would be advantageous, but the exact rules surrounding this will vary from compiler to compiler and I have a feeling most of the time the overhead that the GML type system adds will make it too big for the compiler to deem worthy anyway.
 
 It's worth noting that even if this did work, there are some situations where inlining code can't work at all. Recursive functions can't be inlined for obvious reasons, and large, complex logic shouldn't be inlined because the size of the code would be massive. In particular, methods or functions referenced from variables can't be inlined, because these are indeterminate at compile time, which is when this process takes place; this means that abstractions discussed previously such as the Array class couldn't have their methods inlined even if GameMaker had better support for it, because the compiler can't make any guarantees about what code the methods reference at runtime.
 
