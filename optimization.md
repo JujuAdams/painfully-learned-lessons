@@ -158,6 +158,31 @@ There are also a few functions which return structs or arrays that you want to b
 
 Arrays are the most common structures that run afoul of this, but it also goes for other things, like buffers, ds_whatever, and surfaces. Surfaces can be especially bad because it's easy to create large ones without thinking about it.
 
+<details>
+
+<summary>this is a very extreme example</summary>
+
+Note: these are relatively small arrays, and in this test, "excessive" is defined as 10,000 new array allocations
+
+```gml
+new Benchmark("excessive array allocations", [
+    new TestCase("not doing that", function(iterations) {
+        var array = array_create(10, 0);
+    }),
+    new TestCase("doing that", function(iterations) {
+        repeat (iterations) {
+            var array = array_create(10, 0);
+        }
+    })
+]),
+```
+
+![A GMBenchmark graph that shows calling `array_create()` 10,000 times takes 1.25ms](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/memory_allocations/ow.png)
+
+Is the aesthetic appeal of OOP abstraction worth making your code eleven times slower?
+
+</details>
+
 ### Verdict
 
 If your code does depend on a lot of array allocations, it can be difficult to get rid of them without changing functionality or introducing bugs. In some circumstances, you can ease the burden by declaring an array as a static variable so that it's only allocated once and the same array persists every time you call a function - but this can be dangerous if you're not careful, as it means you can accidentally carry over data from one call of the function to another, which can create errors that are very hard to debug.
