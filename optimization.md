@@ -513,7 +513,7 @@ It's a little weird-looking, but it'll get the job done. Let's have a look at ho
 
 <details>
 
-<summary>here, have a chat</summary>
+<summary>here, have a chart</summary>
 
 ![](https://github.com/DragoniteSpam/GameMakerOptimizationTierList/blob/master/images/loops/loop_types.png?raw=true)
 
