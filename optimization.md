@@ -116,7 +116,29 @@ Excessive abstraction is also a major part of why [much software written today](
 
 <summary>GMBenchmark tests</summary>
 
-Content
+```gml
+new Benchmark("array abstractions", [
+    new TestCase("native", function(iterations) {
+        var array = array_create(100, 123);
+        repeat (iterations) {
+            var n = array[0];
+        }
+    }),
+    new TestCase("oop", function(iterations) {
+        var array = new Array();
+        repeat (100) {
+            array.Push(123);
+        }
+        repeat (iterations) {
+            var n = array.Get(0);
+        }
+    })
+])
+```
+
+![A GMBenchmark graph that shows using native code is 11x faster than OOP](https://raw.githubusercontent.com/DragoniteSpam/GameMakerOptimizationTierList/refs/heads/master/images/abstractions/oop_arrays.png)
+
+Is the aesthetic appeal of OOP abstraction worth making your code eleven times slower?
 
 </details>
 
