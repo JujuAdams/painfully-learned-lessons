@@ -44,6 +44,11 @@ The YYC module should detect changed files and only recompile those needed but i
 
 ## Performance
 
+### How do I make my game run smoother?
+This is called "optimization". [DragoniteSpam](https://github.com/DragoniteSpam/) wrote an excellent [post](https://forum.gamemaker.io/index.php?threads/the-ultimate-gamemaker-optimization-tier-list.122141/) on the GMC which has been [archived on GitHub here](optimization.md).
+
+&nbsp;
+
 ### I am getting performance issues on Windows 11 and newer versions of Windows 10.
 Also often caused by a broken/missing/outdated Visual C++ redistributable. [Try installing this](https://www.microsoft.com/en-us/download/details.aspx?id=30679) (Visual C++ Redistributable for Visual Studio 2012 Update 4).
 
