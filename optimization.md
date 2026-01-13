@@ -112,6 +112,14 @@ Admittedly, it does look nice. However, it doesn't actually add any new function
 
 Excessive abstraction is also a major part of why [much software written today](https://www.electronjs.org/) runs slower than software written twenty years ago for computers with a fraction of the power.
 
+<details>
+
+<summary>GMBenchmark tests</summary>
+
+Content
+
+</details>
+
 ### Verdict
 
 Abstraction is good in a lot of cases, and from a code maintenance standpoint using too few abstractions is much worse than using too many. However, like many things in life, a responsible software developer still needs to think about the abstraction they've written and decide if it actually contributes to their code in a meaningful way.
