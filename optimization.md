@@ -48,7 +48,7 @@ I lied in the last section, there's one absolute rule. This isn't actually an op
 
 If you do this for long enough you develop some intuition for what causes games to slow down. I can probably correctly guess how something will perform about 75% of the time, but that's still not an excuse to not look at the profiler to confirm or unconfirm. You can, and people have, waste days of your life by making assumptions instead of just checking the profiler.
 
-If you're experiencing issues on a specific platform (namely, HTML5 or console), use the profiler that comes with that platform. If you're experiencing GPU issues on Windows or Linux, use RenderDoc.
+If you're experiencing issues on a specific platform (namely, HTML5 or console), use the profiler that comes with that platform. If you're experiencing GPU issues on Windows or Linux, use [RenderDoc](https://github.com/odditica/renderdoc-gms2-kit).
 
 &nbsp;
 
@@ -62,17 +62,17 @@ I might not call these "universal," but they're pretty close. Most of them will 
 
 Let's start off by making this feel like homework.
 
-Time complexity is one of those things you probably heard a lot about if you went to school for computer science, and something you probably haven't if you didn't. In most situations, there are more than one viable way to compute a result. The time complexity of an algorithm describes how many steps it takes to complete for different input sizes.
+[Time complexity](https://en.wikipedia.org/wiki/Time_complexity) is one of those things you probably heard a lot about if you went to school for computer science, and something you probably haven't if you didn't. In most situations, there are more than one viable way to compute a result. The time complexity of an algorithm describes how many steps it takes to complete for different input sizes.
 
 A classic example is sorting a list. If you have a list of random values, you have the option to:
 
-    Compare each value in the list in sequence, and if they're out of order, swap them and restart from the beginning
-    Break the list into smaller pieces, sort the pieces, and stitch them back together
-    Randomly shuffle the list until it sorts itself
+- [Compare each value in the list in sequence, and if they're out of order, swap them and restart from the beginning](https://en.wikipedia.org/wiki/Bubble_sort)
+- [Break the list into smaller pieces, sort the pieces, and stitch them back together](https://en.wikipedia.org/wiki/Merge_sort)
+- [Randomly shuffle the list until it sorts itself](https://en.wikipedia.org/wiki/Bogosort)
 
 Some of these choices have a better time complexity than others. We won't spend too much time on definitions here because this is a long post and I want to sleep eventually, but you should be mindful of how quickly the amount of work the game has to do if you have to evaluate 10, or 20, or 50, or 100, or more pieces of data at a time. An example of an n² routine in a game is an object that checks some property (for example, the distance to, or how much HP or level they have compared to you, or something else) against every other object of its type in the game. If you have 4 objects there will be 12 individual checks, 10 objects will be 90 checks, 50 objects will be 2450 checks, and this will continue to scale with the square of the number of objects.
 
-Yes, this is technically n(n-1) instead of n² operations. It's still considered an n² time complexity because that’s where the function slots into the fast-growing hierarchy.
+*Yes, this is technically n(n-1) instead of n² operations. It's still considered an n² time complexity because that’s where the function slots into the [fast-growing hierarchy](http://xn--https-yv3b//en.wikipedia.org/wiki/Fast-growing_hierarchy%E2%80%99).*
 
 As a side note, sorting a list isn't something you should ever have to do in GameMaker. array_sort is implemented as Quicksort. There was a point in history where it was one of the slower sorts and implementing Quick or Merge Sort yourself could yield performance gains, but this hasn't been the case for several years.
 
