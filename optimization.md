@@ -1,4 +1,12 @@
+*This is a copy of [a GameMaker forum post](https://forum.gamemaker.io/index.php?threads/the-ultimate-gamemaker-optimization-tier-list.122141/) by [DragoniteSpam](https://github.com/DragoniteSpam/).*
+
+&nbsp;
+
+# The Ultimate GameMaker Optimization Tier List
+
 There's a lot that's been said about making GameMaker games run fast over the years. Some of it's good advice, some of it was good advice a long time ago but isn't anymore, and some of it never was good advice but people keep repeating it anyway because it looks good in a tweet. Today we'll be sorting through GameMaker optimization advice using the internet's favorite organizational data structure, the tier list.
+
+&nbsp;
 
 # Why should you listen to me?
 
@@ -7,6 +15,8 @@ Hi, I'm Michael. Depending on who you ask I'm either a community legend or a com
 Oh and I also made this run on a Raspberry Pi.
 
 If the appeal to authority fallacy isn't doing it for you, I'm also going to be posting an experiment or some other citation to go with pretty much everything on this list.
+
+&nbsp;
 
 # Why is GameMaker like this?
 
@@ -20,6 +30,8 @@ Combined with the fact that GameMaker is (mostly) single-threaded, this means th
 
 Lastly, everything I'm going to write here applies to the current GameMaker runtime. In the upcoming GMRT the entire runtime and build system will be rewritten from scratch. The goal is that it should be faster than Current Runtime overall, but in reality it's unknown what the performance situation is going to look like, and it's likely still a long way off. I might or might not rewrite this whole thing when the time comes, but will otherwise I'll just make occasional speculative notes about things that might change in GMRT and ignore it otherwise.
 
+&nbsp;
+
 # Context
 
 There aren't any absolute rules in optimization. There will be optimizations that are more relevant on some platforms than others, or optimizations that apply everywhere except on HTML5 because the HTML5 runner is based on JavaScript, which has a different set of constraints than the regular GameMaker runner. If you do this for long enough you'll eventually find code that looks bad but doesn't really make a difference because you only run it once during Game Start, and you'll eventually find code that doesn't look bad but still adds up because you just tried to simulate the entire observable universe at the same time (whoops). You have to sit back and think about what's happening in your specific game: if you go into your code and start chopping bits off with reckless abandon, without thinking about what you're doing, just because some weirdo on the Internet told you to, bad things are going to happen.
@@ -27,6 +39,8 @@ There aren't any absolute rules in optimization. There will be optimizations tha
 It's important to remember that not all optimizations are created equal. You might find one piece of code that you can make 10% faster, and one piece of code that you can make 50% faster, but the code that you make 10% faster takes 10 ms of frame time while the code that you make 50% faster only takes 0.25 ms. By all means do both if you can, but development time is almost always a limited resource and on some level you have to triage what's most important to work on: in this case, a 10% improvement on a routine that's 10 ms will actually save much more time than a 50% improvement on a routine that takes 0.25 ms.
 
 That brings us to...
+
+&nbsp;
 
 # S+ tier: Profile your game
 
@@ -36,9 +50,13 @@ If you do this for long enough you develop some intuition for what causes games 
 
 If you're experiencing issues on a specific platform (namely, HTML5 or console), use the profiler that comes with that platform. If you're experiencing GPU issues on Windows or Linux, use RenderDoc.
 
+&nbsp;
+
 # S tier: Optimizations that actually make a difference
 
 I might not call these "universal," but they're pretty close. Most of them will also continue to be relevant into GMRT, as they're fundamentally part of "things that make computers slow."
+
+&nbsp;
 
 ## Avoid n² (or worse) algorithms
 
@@ -61,6 +79,8 @@ As a side note, sorting a list isn't something you should ever have to do in Gam
 ### Verdict
 
 Rewriting expensive logic using more efficient algorithms can yield substantial performance wins, but isn't always possible. (This is actually one of the biggest unsolved problems in computer science, although most games don't really deal with NP-hard problems very often.) Most of the time you should just design your game in a way that doesn't need this stuff in the first place.
+
+&nbsp;
 
 ## Avoid abstractions that don't do anything
 
@@ -96,6 +116,8 @@ Excessive abstraction is also a major part of why much software written today ru
 
 Abstraction is good in a lot of cases, and from a code maintenance standpoint using too few abstractions is much worse than using too many. However, like many things in life, a responsible software developer still needs to think about the abstraction they've written and decide if it actually contributes to their code in a meaningful way.
 
+&nbsp;
+
 ## Avoid significant and recurring memory allocations
 
 Moving on from arrays, let's talk about arrays. In a lot of ways arrays are the most fundamental data structure that exists, and they're useful for a lot of things. As with most other things on this list, the cost of allocating a single array of elements isn't too bad, but if you do it excessively - such as in the Step event of every active instance in the game - it can start to become a lot. It's also an easy thing to not think about, since usually when people experience performance issues they look at other things first (probably because they're not using the profiler).
@@ -110,6 +132,8 @@ Arrays are the most common structures that run afoul of this, but it also goes f
 
 If your code does depend on a lot of array allocations, it can be difficult to get rid of them without changing functionality or introducing bugs. In some circumstances, you can ease the burden by declaring an array as a static variable so that it's only allocated once and the same array persists every time you call a function - but this can be dangerous if you're not careful, as it means you can accidentally carry over data from one call of the function to another, which can create errors that are very hard to debug.
 
+&nbsp;
+
 ## If you're using matrix functions, use the output arrays whenever possible.
 
 Be careful with Blur, Bloom, and other full-screen smear-y filters/effects
@@ -122,9 +146,13 @@ GameMaker's effect layers have "quality" settings, but most of them noticeably c
 
 If you need a bloom or glow effect and this becomes a problem, it may be worth writing your own and computing it at low resolution.
 
+&nbsp;
+
 # A tier: Optimizations that are sometimes useful but...
 
 These are all good optimizations, but they won't be applicable to all types of games. Hopefully whatever you're working on can benefit from at least one or two of them.
+
+&nbsp;
 
 ## Deactivating instances
 
@@ -159,6 +187,8 @@ Options to improve this include not doing this every step, or staggering the reg
 
 If you use the additional instance-tracking enhancements mentioned in the Forager article, you'll hit the threshold where deactivation is more expensive than just running the instances faster.
 
+&nbsp;
+
 # Avoid large numbers of batch breaks and texture swaps
 
 Your GPU is happiest when you give it a lot of work to do and don't interrupt it. Anything that changes the GPU state will do this: setting a shader or uniform, most functions that start with gpu_set_ except for gpu_set_depth, setting any kind of matrix, changing surface targets, and some other things will all do this.
@@ -179,7 +209,9 @@ It's important to not let this get out of hand, but as long as things don't get 
 
 Here's a more detailed video I made on it a while ago.
 
-# Disable surface depth if you don't need it
+&nbsp;
+
+## Disable surface depth if you don't need it
 
 By default, all GameMaker surfaces come with a depth and stencil buffer, which you may or may not actually need. It won't automatically make a difference in performance unless you start running out of VRAM, and while AAA games may occasionally run into problems with this [citation needed] if we're being real with ourselves, your GameMaker game probably won't.
 
@@ -195,7 +227,9 @@ If you do need depth or stencil, you can also enable/disable surface depth on de
 
 Feel free to turn off depth if you're not using it. If you use it in some places, make sure to turn it on when creating or resizing the surfaces that do need it, otherwise you can get weird depth sorting errors. Don't try to circumvent needing the depth buffer if you do need it.
 
-# Texture compression
+&nbsp;
+
+## Texture compression
 
 Another VRAM one.
 
@@ -219,7 +253,9 @@ If you're making a game with HD art, you can usually get away with some amount o
 
 Visual novels would be an especially good example for when to use this, since they often involve a lot of large, high-resolution artwork.
 
-# Be mindful how often you query the collision system
+&nbsp;
+
+## Be mindful how often you query the collision system
 
 This was more relevant pre-GMS1 before the collision system was as robust as it is now, but it still makes a small difference. Imagine you have a player who takes damage when they collide with enemies. Logically, it doesn't matter if the collision-checking code for this belongs to the player and checks for enemies or if the code belongs to the enemies and checks for the player. However, if the code belongs to the enemy and there are a large number of enemies on screen, the collision check will run once for every enemy active in the game. If the code belongs to the player, assuming there's only one instance of the player object in the game, the collision check will run once. (Most of the important collision-checking functions have a \_list version which can be used to handle multiple hit results, rather than having to deal with them one at a time.)
 
@@ -232,6 +268,8 @@ This also goes for the Collision events, but I don't think many people use those
 This can be a minor benefit in some types of games, but it's not going to save you if you're experiencing performance issues. However, even if it's not a major optimization, it's probably a preferable organizational strategy and I would generally encourage it for that reason.
 
 It's worth pointing out that a lot of the here is in calling the collision function 6,000 times, and not the logic inside the collision function itself.
+
+&nbsp;
 
 # B tier: Optimizations that technically work but you should only do this after you've gone through everything else in your game
 
@@ -276,6 +314,8 @@ for (var i = 0, n = array_length(array); i < n; i++) {
 ```
 
 There are a bunch of other structures in GameMaker you might loop over: ds_lists, buffers, strings, instances, etc. These should all get similar treatment.
+
+&nbsp;
 
 ## Using repeat loops instead of for loops (also known as, when to not trust pretty graphs)
 
