@@ -1,4 +1,4 @@
-*This is a copy of [a GameMaker forum post](https://forum.gamemaker.io/index.php?threads/the-ultimate-gamemaker-optimization-tier-list.122141/) by [DragoniteSpam](https://github.com/DragoniteSpam/).*
+*This is a copy of [a GameMaker forum post](https://forum.gamemaker.io/index.php?threads/the-ultimate-gamemaker-optimization-tier-list.122141/) by [DragoniteSpam](https://github.com/DragoniteSpam/). The replies to this thread are informative and are worth reading too.*
 
 &nbsp;
 
