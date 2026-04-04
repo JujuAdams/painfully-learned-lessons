@@ -38,6 +38,20 @@ Usually a result of GameMaker missing configuration data for that particular mak
 
 The YYC module should detect changed files and only recompile those needed but it occasionally loses track, especially after adding scripts and objects. To solve this, hit the Clean Cache button (the little brush next to the debug/play/stop buttons in the IDE) to force GameMaker to recompile from scratch. You can also delete specific files from the cache to force a smaller and faster partial recompile but this is often more trouble than it's worth.
 
+### "An Application Control policy has blocked this file. (0x800711C7)"
+
+This is a rare issue but one that totally blocks the game from running. To copy paste [what u/FatTerrierStudio said on the topic](https://old.reddit.com/r/gamemaker/comments/1sbn942/fix_an_application_control_policy_has_blocked/):
+
+> My game was running perfectly until it wasn't, but not because of a programming error. If you get the same error or one similar, the culprit is likely anti-virus or Windows Smart App Control (SAC) blocking a runtime file. For me this was FileIO.dll
+> 
+> To fix this: Windows Security > Virus & threat protection > Manage settings (under Virus & threat protection settings) > Add or remove exclusions (under Exclusions) > Add an exclusion > Folder > C:\ProgramData\GameMakerStudio2
+> 
+> Also add an exclusion for C:\Users\[User]\AppData\Local\GameMakerStudio2
+> 
+> AppData is hidden by default on Windows, so if you can't find it: File Explorer > View > Show > Hidden Items OR just copy and paste the path directly (and add your username). You may need to restart GameMaker after this, but I was able to run my game without restarting.
+> 
+> And, finally, if you don't download software from questionable sources, you can disable SAC: search Smart App Control > Off (just know that re-enabling it can be a pain)
+
 &nbsp;
 
 &nbsp;
