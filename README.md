@@ -38,6 +38,8 @@ Usually a result of GameMaker missing configuration data for that particular mak
 
 The YYC module should detect changed files and only recompile those needed but it occasionally loses track, especially after adding scripts and objects. To solve this, hit the Clean Cache button (the little brush next to the debug/play/stop buttons in the IDE) to force GameMaker to recompile from scratch. You can also delete specific files from the cache to force a smaller and faster partial recompile but this is often more trouble than it's worth.
 
+&nbsp;
+
 ### "An Application Control policy has blocked this file. (0x800711C7)"
 
 This is a rare issue but one that totally blocks the game from running. To copy paste [what u/FatTerrierStudio said on the topic](https://old.reddit.com/r/gamemaker/comments/1sbn942/fix_an_application_control_policy_has_blocked/):
